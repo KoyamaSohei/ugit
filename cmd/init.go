@@ -14,6 +14,7 @@ var InitCmd = &cobra.Command{
 	Use:   "init",
 	Short: "ugit init",
 	Run:   initHandler,
+	Args:  cobra.NoArgs,
 }
 
 func initHandler(cmd *cobra.Command, args []string) {
