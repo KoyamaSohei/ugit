@@ -73,17 +73,18 @@ func GetType(oid string) Type {
 	return Type(b[0])
 }
 
-// SetHEAD set HEAD
-func SetHEAD(oid []byte) {
-	path := fmt.Sprintf("%s/HEAD", GITDIR)
+// UpdateRef update ref
+func UpdateRef(name string, oid []byte) {
+	path := fmt.Sprintf("%s/%s", GITDIR, name)
 	ioutil.WriteFile(path, oid, 0644)
 }
 
-// GetHEAD get HEAD
-func GetHEAD() []byte {
-	path := fmt.Sprintf("%s/HEAD", GITDIR)
+// GetRef get ref
+func GetRef(name string) []byte {
+	path := fmt.Sprintf("%s/%s", GITDIR, name)
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
+		fmt.Printf("warn: not found ref %s\n", name)
 		return []byte{}
 	}
 	return b

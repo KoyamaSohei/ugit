@@ -130,12 +130,12 @@ func isIgnored(path string) bool {
 func Commit(mes string) {
 	dat := WriteTree(".")
 	dat = append(dat, []byte{0, 0}...)
-	parent := data.GetHEAD()
+	parent := data.GetRef("HEAD")
 	dat = append(dat, parent...)
 	dat = append(dat, []byte{0, 0}...)
 	dat = append(dat, []byte(mes)...)
 	h := data.HashObject(dat, data.Commit)
-	data.SetHEAD(h)
+	data.UpdateRef("HEAD", h)
 }
 
 // GetCommit get commit

@@ -53,7 +53,7 @@ func logHandler(cmd *cobra.Command, args []string) {
 		}
 		oid = args[0]
 	} else {
-		oid = fmt.Sprintf("%x", data.GetHEAD())
+		oid = fmt.Sprintf("%x", data.GetRef("HEAD"))
 	}
 	for {
 		t, p, m := base.GetCommit(oid)
