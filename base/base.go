@@ -69,34 +69,35 @@ func iterTreeEntries(oid string) []entry {
 	return ents
 }
 
-func emptyCurrentDirectory() {
-	filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
+// ClearDirectory clear dir
+func ClearDirectory(root string) {
+	files, err := ioutil.ReadDir(root)
+
+	if err != nil {
+		panic(err)
+	}
+
+	for _, f := range files {
+		p := filepath.Join(root, f.Name())
+		if isIgnored(p) {
+			continue
 		}
-		if path == "." {
-			return filepath.SkipDir
-		}
-		if isIgnored(path) && info.IsDir() {
-			return filepath.SkipDir
-		}
-		if isIgnored(path) {
-			return nil
-		}
-		fmt.Printf("remove %s\n", path)
-		if info.IsDir() {
-			if err := os.Remove(path); err != nil {
-				fmt.Printf("warn: %s is not empty\n", path)
+		if !f.IsDir() {
+			fmt.Printf("remove %s\n", p)
+			if err := os.Remove(p); err != nil {
+				panic(err)
 			}
-			return nil
+		} else {
+			ClearDirectory(p)
 		}
-		return os.Remove(path)
-	})
+	}
+	if err := os.Remove(root); err != nil {
+		fmt.Printf("warn: not empty dir %s\n", root)
+	}
 }
 
 // ReadTree read tree
 func ReadTree(oid string) {
-	emptyCurrentDirectory()
 	if data.GetDataType(oid) != data.Tree {
 		panic(fmt.Errorf("this object is not tree"))
 	}

@@ -37,6 +37,7 @@ func writeHandler(cmd *cobra.Command, args []string) {
 }
 
 func readHandler(cmd *cobra.Command, args []string) {
+	base.ClearDirectory(".")
 	base.ReadTree(args[0])
 }
 
