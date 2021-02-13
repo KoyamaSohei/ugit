@@ -7,12 +7,12 @@ import (
 	"os"
 )
 
-// DataType is data type
-type DataType byte
+// Type is data type
+type Type byte
 
 const (
 	// None type
-	None DataType = iota
+	None Type = iota
 	// Blob type
 	Blob
 	// Tree type
@@ -33,7 +33,7 @@ func Init() {
 }
 
 // HashObject gen hash from data and save data.
-func HashObject(data []byte, dtype DataType) []byte {
+func HashObject(data []byte, dtype Type) []byte {
 	data = append([]byte{byte(dtype)}, data...)
 	h := sha1.New()
 	if _, err := h.Write(data); err != nil {
@@ -48,25 +48,25 @@ func HashObject(data []byte, dtype DataType) []byte {
 }
 
 // GetObject get file from hash
-func GetObject(oid string, expected DataType) []byte {
+func GetObject(oid string, expected Type) []byte {
 	path := fmt.Sprintf("%s/objects/%s", GITDIR, oid)
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
 		panic(err)
 	}
-	if t := DataType(b[0]); expected != None && expected != t {
+	if t := Type(b[0]); expected != None && expected != t {
 		panic(fmt.Errorf("data type is invalid"))
 	}
 	b = b[1:]
 	return b
 }
 
-// GetDataType get data type
-func GetDataType(oid string) DataType {
+// GetType get data type
+func GetType(oid string) Type {
 	path := fmt.Sprintf("%s/objects/%s", GITDIR, oid)
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
 		panic(err)
 	}
-	return DataType(b[0])
+	return Type(b[0])
 }

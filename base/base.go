@@ -98,12 +98,12 @@ func ClearDirectory(root string) {
 
 // ReadTree read tree
 func ReadTree(oid string) {
-	if data.GetDataType(oid) != data.Tree {
+	if data.GetType(oid) != data.Tree {
 		panic(fmt.Errorf("this object is not tree"))
 	}
 	for _, e := range iterTreeEntries(oid) {
 		oids := fmt.Sprintf("%x", e.oid)
-		switch data.GetDataType(oids) {
+		switch data.GetType(oids) {
 		case data.Tree:
 			if err := os.MkdirAll(e.name, 0755); err != nil {
 				panic(err)
