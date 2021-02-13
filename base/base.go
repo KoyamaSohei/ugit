@@ -144,3 +144,10 @@ func GetCommit(oid string) ([]byte, []byte, string) {
 	prop := bytes.Split(b, []byte{0, 0})
 	return prop[0], prop[1], string(prop[2])
 }
+
+// Checkout checkout
+func Checkout(oid string) {
+	t, _, _ := GetCommit(oid)
+	ts := fmt.Sprintf("%x", t)
+	ReadTree(ts)
+}

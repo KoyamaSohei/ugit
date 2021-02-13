@@ -65,6 +65,14 @@ func logHandler(cmd *cobra.Command, args []string) {
 	}
 }
 
+func checkoutHandler(cmd *cobra.Command, args []string) {
+	if data.GetType(args[0]) != data.Commit {
+		panic(fmt.Errorf("hash type is %d,not Commit", data.GetType(args[0])))
+	}
+	base.ClearDirectory(".")
+	base.Checkout(args[0])
+}
+
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   "ugit",
@@ -116,6 +124,12 @@ func main() {
 		Run:   logHandler,
 		Args:  cobra.MaximumNArgs(1),
 	}
+	checkoutCmd := &cobra.Command{
+		Use:   "checkout",
+		Short: "checkout",
+		Run:   checkoutHandler,
+		Args:  cobra.ExactArgs(1),
+	}
 
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(hashCmd)
@@ -124,6 +138,7 @@ func main() {
 	rootCmd.AddCommand(readCmd)
 	rootCmd.AddCommand(commitCmd)
 	rootCmd.AddCommand(logCmd)
+	rootCmd.AddCommand(checkoutCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
