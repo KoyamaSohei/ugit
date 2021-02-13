@@ -1,32 +1,51 @@
 package base
 
 import (
-	"fmt"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 
-	"github.com/KoyamaSohei/ugit/data"
+	data "github.com/KoyamaSohei/ugit/data"
 )
 
+type entry struct {
+	oid  []byte
+	name string
+}
+
 // WriteTree write tree
-func WriteTree() {
-	_ = filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
-			return err
+func WriteTree(root string) []byte {
+	ents := make([]entry, 0)
+	files, err := ioutil.ReadDir(root)
+
+	if err != nil {
+		panic(err)
+	}
+
+	for _, f := range files {
+		if f.Name() == ".git" || f.Name() == ".ugit" {
+			continue
 		}
-		if path == ".git" || path == ".ugit" {
-			return filepath.SkipDir
-		}
-		if !info.IsDir() {
-			dat, err := ioutil.ReadFile(path)
+		if !f.IsDir() {
+			dat, err := ioutil.ReadFile(filepath.Join(root, f.Name()))
 			if err != nil {
-				return err
+				panic(err)
 			}
 			h := data.HashObject(dat, data.Blob)
-			fmt.Printf("%x\n", h)
+			ents = append(ents, entry{name: f.Name(), oid: h})
+		} else {
+			h := WriteTree(filepath.Join(root, f.Name()))
+			ents = append(ents, entry{name: f.Name(), oid: h})
 		}
-		return nil
-	})
+	}
+
+	conts := make([]byte, 0)
+	for _, ent := range ents {
+		c := ent.oid
+		c = append(c, 0)
+		c = append(c, []byte(ent.name)...)
+		c = append(c, 0)
+		conts = append(conts, c...)
+	}
+
+	return data.HashObject(conts, data.Tree)
 }
