@@ -75,7 +75,7 @@ func emptyCurrentDirectory() {
 			return err
 		}
 		if path == "." {
-			return nil
+			return filepath.SkipDir
 		}
 		if isIgnored(path) && info.IsDir() {
 			return filepath.SkipDir
