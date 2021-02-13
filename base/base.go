@@ -2,8 +2,11 @@ package base
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/KoyamaSohei/ugit/data"
 )
 
 // WriteTree write tree
@@ -17,7 +20,12 @@ func WriteTree() {
 			return filepath.SkipDir
 		}
 		if !info.IsDir() {
-			fmt.Println(path)
+			dat, err := ioutil.ReadFile(path)
+			if err != nil {
+				return err
+			}
+			h := data.HashObject(dat, data.Blob)
+			fmt.Printf("%x\n", h)
 		}
 		return nil
 	})
