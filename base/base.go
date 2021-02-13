@@ -2,6 +2,7 @@ package base
 
 import (
 	"bytes"
+	"encoding/hex"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -55,7 +56,7 @@ func WriteTree(root string) []byte {
 	return data.HashObject(conts, data.Tree)
 }
 
-func iterTreeEntries(oid string) []entry {
+func iterTreeEntries(oid []byte) []entry {
 	h := data.GetObject(oid, data.Tree)
 	ents := make([]entry, 0)
 	o := make([]byte, 0)
@@ -97,20 +98,19 @@ func ClearDirectory(root string) {
 }
 
 // ReadTree read tree
-func ReadTree(oid string) {
+func ReadTree(oid []byte) {
 	if data.GetType(oid) != data.Tree {
 		panic(fmt.Errorf("this object is not tree"))
 	}
 	for _, e := range iterTreeEntries(oid) {
-		oids := fmt.Sprintf("%x", e.oid)
-		switch data.GetType(oids) {
+		switch data.GetType(oid) {
 		case data.Tree:
 			if err := os.MkdirAll(e.name, 0755); err != nil {
 				panic(err)
 			}
-			ReadTree(oids)
+			ReadTree(oid)
 		case data.Blob:
-			b := data.GetObject(oids, data.Blob)
+			b := data.GetObject(oid, data.Blob)
 			if err := os.MkdirAll(filepath.Dir(e.name), 0755); err != nil {
 				panic(err)
 			}
@@ -139,21 +139,32 @@ func Commit(mes string) {
 }
 
 // GetCommit get commit
-func GetCommit(oid string) ([]byte, []byte, string) {
+func GetCommit(oid []byte) ([]byte, []byte, string) {
 	b := data.GetObject(oid, data.Commit)
 	prop := bytes.Split(b, []byte{0, 0})
 	return prop[0], prop[1], string(prop[2])
 }
 
 // Checkout checkout
-func Checkout(oid string) {
+func Checkout(oid []byte) {
 	t, _, _ := GetCommit(oid)
-	ts := fmt.Sprintf("%x", t)
-	ReadTree(ts)
+	ReadTree(t)
 }
 
 // CreateTag create tag
 func CreateTag(name string, oid []byte) {
 	path := fmt.Sprintf("refs/tags/%s", name)
 	data.UpdateRef(path, oid)
+}
+
+// GetOid get oid
+func GetOid(oids string) []byte {
+	if b := data.GetRef(oids); len(b) > 0 {
+		return b
+	}
+	b, err := hex.DecodeString(oids)
+	if err != nil {
+		panic(err)
+	}
+	return b
 }

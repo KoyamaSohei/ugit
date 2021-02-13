@@ -50,8 +50,8 @@ func HashObject(data []byte, dtype Type) []byte {
 }
 
 // GetObject get file from hash
-func GetObject(oid string, expected Type) []byte {
-	path := fmt.Sprintf("%s/objects/%s", GITDIR, oid)
+func GetObject(oid []byte, expected Type) []byte {
+	path := fmt.Sprintf("%s/objects/%x", GITDIR, oid)
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
 		panic(err)
@@ -64,8 +64,8 @@ func GetObject(oid string, expected Type) []byte {
 }
 
 // GetType get data type
-func GetType(oid string) Type {
-	path := fmt.Sprintf("%s/objects/%s", GITDIR, oid)
+func GetType(oid []byte) Type {
+	path := fmt.Sprintf("%s/objects/%x", GITDIR, oid)
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
 		panic(err)

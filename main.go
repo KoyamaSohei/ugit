@@ -28,7 +28,7 @@ func hashHandler(cmd *cobra.Command, args []string) {
 }
 
 func catHandler(cmd *cobra.Command, args []string) {
-	b := data.GetObject(args[0], data.None)
+	b := data.GetObject(base.GetOid(args[0]), data.None)
 	fmt.Printf("%s", string(b))
 }
 
@@ -39,7 +39,7 @@ func writeHandler(cmd *cobra.Command, args []string) {
 
 func readHandler(cmd *cobra.Command, args []string) {
 	base.ClearDirectory(".")
-	base.ReadTree(args[0])
+	base.ReadTree(base.GetOid(args[0]))
 }
 
 func commitHandler(cmd *cobra.Command, args []string) {
@@ -47,31 +47,30 @@ func commitHandler(cmd *cobra.Command, args []string) {
 }
 
 func logHandler(cmd *cobra.Command, args []string) {
-	oid := ""
+	oid := data.GetRef("HEAD")
 	if len(args) == 1 {
-		if data.GetType(args[0]) != data.Commit {
-			panic(fmt.Errorf("hash type is %d,not Commit", data.GetType(args[0])))
+		oid = base.GetOid(args[0])
+		if data.GetType(oid) != data.Commit {
+			panic(fmt.Errorf("hash type is %d,not Commit", data.GetType(oid)))
 		}
-		oid = args[0]
-	} else {
-		oid = fmt.Sprintf("%x", data.GetRef("HEAD"))
 	}
 	for {
 		t, p, m := base.GetCommit(oid)
-		fmt.Printf("commit: %s\ntree: %x\nmessage: %s\n\n", oid, t, m)
+		fmt.Printf("commit: %x\ntree: %x\nmessage: %s\n\n", oid, t, m)
 		if len(p) == 0 {
 			break
 		}
-		oid = fmt.Sprintf("%x", p)
+		oid = p
 	}
 }
 
 func checkoutHandler(cmd *cobra.Command, args []string) {
-	if data.GetType(args[0]) != data.Commit {
-		panic(fmt.Errorf("hash type is %d,not Commit", data.GetType(args[0])))
+	oid := base.GetOid(args[0])
+	if data.GetType(oid) != data.Commit {
+		panic(fmt.Errorf("hash type is %d,not Commit", data.GetType(oid)))
 	}
 	base.ClearDirectory(".")
-	base.Checkout(args[0])
+	base.Checkout(oid)
 }
 
 func tagHandler(cmd *cobra.Command, args []string) {
