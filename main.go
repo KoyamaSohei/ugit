@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -74,7 +75,15 @@ func checkoutHandler(cmd *cobra.Command, args []string) {
 }
 
 func tagHandler(cmd *cobra.Command, args []string) {
-	base.CreateTag(args[0], args[1])
+	if len(args) == 1 {
+		base.CreateTag(args[0], data.GetRef("HEAD"))
+		return
+	}
+	oid, err := hex.DecodeString(args[1])
+	if err != nil {
+		panic(err)
+	}
+	base.CreateTag(args[0], oid)
 }
 
 func main() {
@@ -138,7 +147,7 @@ func main() {
 		Use:   "tag",
 		Short: "tag",
 		Run:   tagHandler,
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.RangeArgs(1, 2),
 	}
 
 	rootCmd.AddCommand(initCmd)
