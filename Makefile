@@ -2,7 +2,7 @@
 
 all: ugit
 
-ugit: data/*.go
+ugit: *.go data/*.go
 	go build
 
 clean: 
