@@ -1,6 +1,8 @@
 .PHONY: all clean
 
 all: ugit
+
+ugit: cmd/*.go data/*.go
 	go build
 
 clean: 
