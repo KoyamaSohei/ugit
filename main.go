@@ -36,6 +36,10 @@ func writeHandler(cmd *cobra.Command, args []string) {
 	fmt.Printf("%x\n", h)
 }
 
+func readHandler(cmd *cobra.Command, args []string) {
+	base.ReadTree(args[0])
+}
+
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   "ugit",
@@ -69,11 +73,18 @@ func main() {
 		Run:   writeHandler,
 		Args:  cobra.NoArgs,
 	}
+	readCmd := &cobra.Command{
+		Use:   "read-tree",
+		Short: "read tree",
+		Run:   readHandler,
+		Args:  cobra.ExactArgs(1),
+	}
 
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(hashCmd)
 	rootCmd.AddCommand(catCmd)
 	rootCmd.AddCommand(writeCmd)
+	rootCmd.AddCommand(readCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

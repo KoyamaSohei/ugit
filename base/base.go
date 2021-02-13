@@ -1,6 +1,8 @@
 package base
 
 import (
+	"bytes"
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 
@@ -41,11 +43,41 @@ func WriteTree(root string) []byte {
 	conts := make([]byte, 0)
 	for _, ent := range ents {
 		c := ent.oid
-		c = append(c, 0)
+		c = append(c, []byte{0, 0}...)
 		c = append(c, []byte(ent.name)...)
-		c = append(c, 0)
+		c = append(c, []byte{0, 0}...)
 		conts = append(conts, c...)
 	}
 
 	return data.HashObject(conts, data.Tree)
+}
+
+func iterTreeEntries(oid string) []entry {
+	h := data.GetObject(oid, data.Tree)
+	ents := make([]entry, 0)
+	o := make([]byte, 0)
+	for k, b := range bytes.Split(h, []byte{0, 0}) {
+		if k%2 == 0 {
+			o = b
+			continue
+		}
+		ents = append(ents, entry{oid: o, name: string(b)})
+	}
+	return ents
+}
+
+// ReadTree read tree
+func ReadTree(oid string) {
+	if data.GetDataType(oid) != data.Tree {
+		panic(fmt.Errorf("this object is not tree"))
+	}
+	for _, e := range iterTreeEntries(oid) {
+		p := fmt.Sprintf("%x", e.oid)
+		switch data.GetDataType(p) {
+		case data.Tree:
+			ReadTree(p)
+		case data.Blob:
+			fmt.Printf("%s: %x\n", e.name, e.oid)
+		}
+	}
 }
