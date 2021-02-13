@@ -1,4 +1,4 @@
-.PHONY: all clean
+.PHONY: all clean test
 
 all: ugit
 
@@ -8,3 +8,6 @@ ugit: cmd/*.go data/*.go
 clean: 
 	rm ugit && \
 	rm -r -f .ugit
+
+test:
+	go test
