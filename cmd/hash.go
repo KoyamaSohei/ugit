@@ -8,8 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// HashCmd is save object command
-var HashCmd = &cobra.Command{
+var hashCmd = &cobra.Command{
 	Use:   "hash-object",
 	Short: "save object",
 	Run:   hashHandler,

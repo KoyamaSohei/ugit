@@ -9,8 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// InitCmd is ugit init command.
-var InitCmd = &cobra.Command{
+var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "ugit init",
 	Run:   initHandler,
