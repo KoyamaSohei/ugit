@@ -151,3 +151,8 @@ func Checkout(oid string) {
 	ts := fmt.Sprintf("%x", t)
 	ReadTree(ts)
 }
+
+// CreateTag create tag
+func CreateTag(name string, oid string) {
+	// TODO
+}

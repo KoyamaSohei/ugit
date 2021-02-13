@@ -73,6 +73,10 @@ func checkoutHandler(cmd *cobra.Command, args []string) {
 	base.Checkout(args[0])
 }
 
+func tagHandler(cmd *cobra.Command, args []string) {
+	base.CreateTag(args[0], args[1])
+}
+
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   "ugit",
@@ -130,6 +134,12 @@ func main() {
 		Run:   checkoutHandler,
 		Args:  cobra.ExactArgs(1),
 	}
+	tagCmd := &cobra.Command{
+		Use:   "tag",
+		Short: "tag",
+		Run:   tagHandler,
+		Args:  cobra.ExactArgs(2),
+	}
 
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(hashCmd)
@@ -139,6 +149,7 @@ func main() {
 	rootCmd.AddCommand(commitCmd)
 	rootCmd.AddCommand(logCmd)
 	rootCmd.AddCommand(checkoutCmd)
+	rootCmd.AddCommand(tagCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
