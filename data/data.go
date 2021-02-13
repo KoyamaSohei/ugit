@@ -78,3 +78,13 @@ func SetHEAD(oid []byte) {
 	path := fmt.Sprintf("%s/HEAD", GITDIR)
 	ioutil.WriteFile(path, oid, 0644)
 }
+
+// GetHEAD get HEAD
+func GetHEAD() []byte {
+	path := fmt.Sprintf("%s/HEAD", GITDIR)
+	b, err := ioutil.ReadFile(path)
+	if err != nil {
+		return []byte{}
+	}
+	return b
+}
