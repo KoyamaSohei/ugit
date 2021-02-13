@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 // Type is data type
@@ -76,7 +77,12 @@ func GetType(oid []byte) Type {
 // UpdateRef update ref
 func UpdateRef(name string, oid []byte) {
 	path := fmt.Sprintf("%s/%s", GITDIR, name)
-	ioutil.WriteFile(path, oid, 0644)
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		panic(err)
+	}
+	if err := ioutil.WriteFile(path, oid, 0644); err != nil {
+		panic(err)
+	}
 }
 
 // GetRef get ref
