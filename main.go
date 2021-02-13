@@ -32,7 +32,7 @@ func catHandler(cmd *cobra.Command, args []string) {
 }
 
 func writeHandler(cmd *cobra.Command, args []string) {
-	base.WriteTree(".")
+	base.WriteTree()
 }
 
 func main() {
