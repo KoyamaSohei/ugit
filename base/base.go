@@ -27,16 +27,17 @@ func WriteTree(root string) []byte {
 		if f.Name() == ".git" || f.Name() == ".ugit" {
 			continue
 		}
+		p := filepath.Join(root, f.Name())
 		if !f.IsDir() {
-			dat, err := ioutil.ReadFile(filepath.Join(root, f.Name()))
+			dat, err := ioutil.ReadFile(p)
 			if err != nil {
 				panic(err)
 			}
 			h := data.HashObject(dat, data.Blob)
-			ents = append(ents, entry{name: f.Name(), oid: h})
+			ents = append(ents, entry{name: p, oid: h})
 		} else {
 			h := WriteTree(filepath.Join(root, f.Name()))
-			ents = append(ents, entry{name: f.Name(), oid: h})
+			ents = append(ents, entry{name: p, oid: h})
 		}
 	}
 
