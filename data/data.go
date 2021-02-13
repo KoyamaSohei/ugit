@@ -17,6 +17,8 @@ const (
 	Blob
 	// Tree type
 	Tree
+	// Commit type
+	Commit
 )
 
 // GITDIR is git directory

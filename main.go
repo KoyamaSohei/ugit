@@ -41,6 +41,14 @@ func readHandler(cmd *cobra.Command, args []string) {
 	base.ReadTree(args[0])
 }
 
+func commitHandler(cmd *cobra.Command, args []string) {
+	dat := base.WriteTree(".")
+	dat = append(dat, []byte{0, 0}...)
+	dat = append(dat, []byte(args[0])...)
+	h := data.HashObject(dat, data.Commit)
+	fmt.Printf("%x\n", h)
+}
+
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   "ugit",
@@ -80,12 +88,19 @@ func main() {
 		Run:   readHandler,
 		Args:  cobra.ExactArgs(1),
 	}
+	commitCmd := &cobra.Command{
+		Use:   "commit",
+		Short: "commit [commit message]",
+		Run:   commitHandler,
+		Args:  cobra.ExactArgs(1),
+	}
 
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(hashCmd)
 	rootCmd.AddCommand(catCmd)
 	rootCmd.AddCommand(writeCmd)
 	rootCmd.AddCommand(readCmd)
+	rootCmd.AddCommand(commitCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
