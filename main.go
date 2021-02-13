@@ -5,7 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/KoyamaSohei/ugit/data"
+	base "github.com/KoyamaSohei/ugit/base"
+	data "github.com/KoyamaSohei/ugit/data"
 	"github.com/spf13/cobra"
 )
 
@@ -28,6 +29,10 @@ func hashHandler(cmd *cobra.Command, args []string) {
 func catHandler(cmd *cobra.Command, args []string) {
 	b := data.GetObject(args[0], data.None)
 	fmt.Printf("%s", string(b))
+}
+
+func writeHandler(cmd *cobra.Command, args []string) {
+	base.WriteTree(".")
 }
 
 func main() {
@@ -57,10 +62,17 @@ func main() {
 		Run:   catHandler,
 		Args:  cobra.ExactArgs(1),
 	}
+	writeCmd := &cobra.Command{
+		Use:   "write-tree",
+		Short: "ugit write",
+		Run:   writeHandler,
+		Args:  cobra.NoArgs,
+	}
 
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(hashCmd)
 	rootCmd.AddCommand(catCmd)
+	rootCmd.AddCommand(writeCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
