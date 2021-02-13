@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	data "github.com/KoyamaSohei/ugit/data"
 )
@@ -25,10 +26,10 @@ func WriteTree(root string) []byte {
 	}
 
 	for _, f := range files {
-		if f.Name() == ".git" || f.Name() == ".ugit" || f.Name() == "ugit" {
+		p := filepath.Join(root, f.Name())
+		if isIgnored(p) {
 			continue
 		}
-		p := filepath.Join(root, f.Name())
 		if !f.IsDir() {
 			dat, err := ioutil.ReadFile(p)
 			if err != nil {
@@ -68,8 +69,34 @@ func iterTreeEntries(oid string) []entry {
 	return ents
 }
 
+func emptyCurrentDirectory() {
+	filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if path == "." {
+			return nil
+		}
+		if isIgnored(path) && info.IsDir() {
+			return filepath.SkipDir
+		}
+		if isIgnored(path) {
+			return nil
+		}
+		fmt.Printf("remove %s\n", path)
+		if info.IsDir() {
+			if err := os.Remove(path); err != nil {
+				fmt.Printf("warn: %s is not empty\n", path)
+			}
+			return nil
+		}
+		return os.Remove(path)
+	})
+}
+
 // ReadTree read tree
 func ReadTree(oid string) {
+	emptyCurrentDirectory()
 	if data.GetDataType(oid) != data.Tree {
 		panic(fmt.Errorf("this object is not tree"))
 	}
@@ -89,4 +116,8 @@ func ReadTree(oid string) {
 			fmt.Printf("%s: %x\n", e.name, e.oid)
 		}
 	}
+}
+
+func isIgnored(path string) bool {
+	return strings.Contains(path, ".git") || strings.Contains(path, ".ugit") || strings.Contains(path, "ugit")
 }
