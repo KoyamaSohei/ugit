@@ -46,7 +46,7 @@ func commitHandler(cmd *cobra.Command, args []string) {
 	dat = append(dat, []byte{0, 0}...)
 	dat = append(dat, []byte(args[0])...)
 	h := data.HashObject(dat, data.Commit)
-	fmt.Printf("%x\n", h)
+	data.SetHEAD(h)
 }
 
 func main() {

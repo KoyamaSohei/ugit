@@ -72,3 +72,9 @@ func GetType(oid string) Type {
 	}
 	return Type(b[0])
 }
+
+// SetHEAD set HEAD
+func SetHEAD(oid []byte) {
+	path := fmt.Sprintf("%s/HEAD", GITDIR)
+	ioutil.WriteFile(path, oid, 0644)
+}
