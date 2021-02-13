@@ -60,3 +60,13 @@ func GetObject(oid string, expected DataType) []byte {
 	b = b[1:]
 	return b
 }
+
+// GetDataType get data type
+func GetDataType(oid string) DataType {
+	path := fmt.Sprintf("%s/objects/%s", GITDIR, oid)
+	b, err := ioutil.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+	return DataType(b[0])
+}
