@@ -45,6 +45,15 @@ func commitHandler(cmd *cobra.Command, args []string) {
 	base.Commit(args[0])
 }
 
+func logHandler(cmd *cobra.Command, args []string) {
+	oid := data.GetHEAD()
+	for len(oid) > 0 {
+		t, p, m := base.GetCommit(oid)
+		fmt.Printf("commit: %x \n%s\n\n", t, m)
+		oid = p
+	}
+}
+
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   "ugit",
@@ -90,6 +99,12 @@ func main() {
 		Run:   commitHandler,
 		Args:  cobra.ExactArgs(1),
 	}
+	logCmd := &cobra.Command{
+		Use:   "log",
+		Short: "log",
+		Run:   logHandler,
+		Args:  cobra.NoArgs,
+	}
 
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(hashCmd)
@@ -97,6 +112,7 @@ func main() {
 	rootCmd.AddCommand(writeCmd)
 	rootCmd.AddCommand(readCmd)
 	rootCmd.AddCommand(commitCmd)
+	rootCmd.AddCommand(logCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

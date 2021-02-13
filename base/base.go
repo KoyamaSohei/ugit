@@ -137,3 +137,11 @@ func Commit(mes string) {
 	h := data.HashObject(dat, data.Commit)
 	data.SetHEAD(h)
 }
+
+// GetCommit get commit
+func GetCommit(oid []byte) ([]byte, []byte, string) {
+	oids := fmt.Sprintf("%x", oid)
+	b := data.GetObject(oids, data.Commit)
+	prop := bytes.Split(b, []byte{0, 0})
+	return prop[0], prop[1], string(prop[2])
+}
