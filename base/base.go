@@ -13,6 +13,9 @@ func WriteTree() {
 			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
 			return err
 		}
+		if path == ".git" {
+			return filepath.SkipDir
+		}
 		if !info.IsDir() {
 			fmt.Println(path)
 		}
