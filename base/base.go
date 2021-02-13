@@ -103,14 +103,14 @@ func ReadTree(oid []byte) {
 		panic(fmt.Errorf("this object is not tree"))
 	}
 	for _, e := range iterTreeEntries(oid) {
-		switch data.GetType(oid) {
+		switch data.GetType(e.oid) {
 		case data.Tree:
 			if err := os.MkdirAll(e.name, 0755); err != nil {
 				panic(err)
 			}
-			ReadTree(oid)
+			ReadTree(e.oid)
 		case data.Blob:
-			b := data.GetObject(oid, data.Blob)
+			b := data.GetObject(e.oid, data.Blob)
 			if err := os.MkdirAll(filepath.Dir(e.name), 0755); err != nil {
 				panic(err)
 			}
