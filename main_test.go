@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"testing"
@@ -18,5 +20,13 @@ func Test_main(t *testing.T) {
 	init := exec.Command("./ugit", "init")
 	assert.Nil(t, init.Run())
 	hash := exec.Command("./ugit", "hash-object", "main.go")
-	assert.Nil(t, hash.Run())
+	h, err := hash.Output()
+	assert.Nil(t, err)
+	fmt.Printf("hash: %s\n", string(h))
+	cat := exec.Command("./ugit", "cat-file", string(h))
+	o, err := cat.Output()
+	assert.Nil(t, err)
+	m, err := ioutil.ReadFile("main.go")
+	assert.Nil(t, err)
+	assert.Equal(t, o, m)
 }
