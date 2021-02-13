@@ -110,7 +110,10 @@ func ReadTree(oid string) {
 			ReadTree(oids)
 		case data.Blob:
 			b := data.GetObject(oids, data.Blob)
-			if err := ioutil.WriteFile(e.name, b, 0777); err != nil {
+			if err := os.MkdirAll(filepath.Dir(e.name), 0755); err != nil {
+				panic(err)
+			}
+			if err := ioutil.WriteFile(e.name, b, 0755); err != nil {
 				panic(err)
 			}
 			fmt.Printf("%s: %x\n", e.name, e.oid)
