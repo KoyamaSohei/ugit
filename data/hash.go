@@ -7,7 +7,8 @@ import (
 )
 
 // HashObject gen hash from data and save data.
-func HashObject(data []byte) []byte {
+func HashObject(data []byte, dtype dataType) []byte {
+	data = append([]byte{byte(dtype)}, data...)
 	h := sha1.New()
 	if _, err := h.Write(data); err != nil {
 		panic(err)

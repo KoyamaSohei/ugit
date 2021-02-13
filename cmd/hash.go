@@ -20,6 +20,6 @@ func hashHandler(cmd *cobra.Command, args []string) {
 	if err != nil {
 		panic(err)
 	}
-	h := data.HashObject(dat)
+	h := data.HashObject(dat, data.Blob)
 	fmt.Printf("%x", h)
 }

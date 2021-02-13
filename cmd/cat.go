@@ -15,6 +15,6 @@ var catCmd = &cobra.Command{
 }
 
 func catHandler(cmd *cobra.Command, args []string) {
-	b := data.GetObject(args[0])
+	b := data.GetObject(args[0], data.None)
 	fmt.Printf("%s", string(b))
 }
