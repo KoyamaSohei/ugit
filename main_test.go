@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -29,4 +30,12 @@ func Test_main(t *testing.T) {
 	m, err := ioutil.ReadFile("main.go")
 	assert.Nil(t, err)
 	assert.Equal(t, o, m)
+}
+
+func TestDecode(t *testing.T) {
+	b := []byte("fooo")
+	bs := fmt.Sprintf("%x", b)
+	bsr, err := hex.DecodeString(bs)
+	assert.Nil(t, err)
+	assert.Equal(t, b, bsr)
 }

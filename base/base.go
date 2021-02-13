@@ -2,6 +2,7 @@ package base
 
 import (
 	"bytes"
+	"encoding/hex"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -153,6 +154,11 @@ func Checkout(oid string) {
 }
 
 // CreateTag create tag
-func CreateTag(name string, oid string) {
-	// TODO
+func CreateTag(name string, oids string) {
+	path := fmt.Sprintf("refs/tags/%s", name)
+	oid, err := hex.DecodeString(oids)
+	if err != nil {
+		panic(err)
+	}
+	data.UpdateRef(path, oid)
 }
