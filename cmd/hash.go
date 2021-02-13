@@ -21,5 +21,5 @@ func hashHandler(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 	h := data.HashObject(dat)
-	fmt.Printf("%b\n", h)
+	fmt.Printf("%x\n", h)
 }
