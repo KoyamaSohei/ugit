@@ -159,8 +159,20 @@ func CreateTag(name string, oid []byte) {
 
 // GetOid get oid
 func GetOid(oids string) []byte {
-	if b := data.GetRef(oids); len(b) > 0 {
-		return b
+	prefixs := []string{
+		"",
+		"refs/",
+		"refs/tags/",
+		"refs/heads/",
+	}
+	for _, p := range prefixs {
+		path := fmt.Sprintf("%s%s", p, oids)
+		if b := data.GetRef(path); len(b) > 0 {
+			return b
+		}
+	}
+	if len(oids) != 40 {
+		panic(fmt.Errorf("Unknown name %s", oids))
 	}
 	b, err := hex.DecodeString(oids)
 	if err != nil {
