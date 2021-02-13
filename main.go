@@ -48,13 +48,19 @@ func commitHandler(cmd *cobra.Command, args []string) {
 func logHandler(cmd *cobra.Command, args []string) {
 	oid := ""
 	if len(args) == 1 {
+		if data.GetType(args[0]) != data.Commit {
+			panic(fmt.Errorf("hash type is %d,not Commit", data.GetType(args[0])))
+		}
 		oid = args[0]
 	} else {
 		oid = fmt.Sprintf("%x", data.GetHEAD())
 	}
-	for len(oid) > 0 {
+	for {
 		t, p, m := base.GetCommit(oid)
-		fmt.Printf("commit: %x \n%s\n\n", t, m)
+		fmt.Printf("commit: %s\ntree: %x\nmessage: %s\n\n", oid, t, m)
+		if len(p) == 0 {
+			break
+		}
 		oid = fmt.Sprintf("%x", p)
 	}
 }
