@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	data "github.com/KoyamaSohei/ugit/data"
@@ -24,7 +25,7 @@ func WriteTree(root string) []byte {
 	}
 
 	for _, f := range files {
-		if f.Name() == ".git" || f.Name() == ".ugit" {
+		if f.Name() == ".git" || f.Name() == ".ugit" || f.Name() == "ugit" {
 			continue
 		}
 		p := filepath.Join(root, f.Name())
@@ -76,8 +77,15 @@ func ReadTree(oid string) {
 		oids := fmt.Sprintf("%x", e.oid)
 		switch data.GetDataType(oids) {
 		case data.Tree:
+			if err := os.MkdirAll(e.name, 0755); err != nil {
+				panic(err)
+			}
 			ReadTree(oids)
 		case data.Blob:
+			b := data.GetObject(oids, data.Blob)
+			if err := ioutil.WriteFile(e.name, b, 0777); err != nil {
+				panic(err)
+			}
 			fmt.Printf("%s: %x\n", e.name, e.oid)
 		}
 	}
