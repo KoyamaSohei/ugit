@@ -114,7 +114,7 @@ func ReadTree(oid string) {
 			if err := os.MkdirAll(filepath.Dir(e.name), 0755); err != nil {
 				panic(err)
 			}
-			if err := ioutil.WriteFile(e.name, b, 0755); err != nil {
+			if err := ioutil.WriteFile(e.name, b, 0644); err != nil {
 				panic(err)
 			}
 			fmt.Printf("%s: %x\n", e.name, e.oid)
