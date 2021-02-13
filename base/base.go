@@ -73,10 +73,10 @@ func ReadTree(oid string) {
 		panic(fmt.Errorf("this object is not tree"))
 	}
 	for _, e := range iterTreeEntries(oid) {
-		p := fmt.Sprintf("%x", e.oid)
-		switch data.GetDataType(p) {
+		oids := fmt.Sprintf("%x", e.oid)
+		switch data.GetDataType(oids) {
 		case data.Tree:
-			ReadTree(p)
+			ReadTree(oids)
 		case data.Blob:
 			fmt.Printf("%s: %x\n", e.name, e.oid)
 		}
