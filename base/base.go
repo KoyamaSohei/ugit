@@ -36,7 +36,7 @@ func WriteTree(root string) []byte {
 			h := data.HashObject(dat, data.Blob)
 			ents = append(ents, entry{name: p, oid: h})
 		} else {
-			h := WriteTree(filepath.Join(root, f.Name()))
+			h := WriteTree(p)
 			ents = append(ents, entry{name: p, oid: h})
 		}
 	}
