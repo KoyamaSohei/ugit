@@ -46,11 +46,16 @@ func commitHandler(cmd *cobra.Command, args []string) {
 }
 
 func logHandler(cmd *cobra.Command, args []string) {
-	oid := data.GetHEAD()
+	oid := ""
+	if len(args) == 1 {
+		oid = args[0]
+	} else {
+		oid = fmt.Sprintf("%x", data.GetHEAD())
+	}
 	for len(oid) > 0 {
 		t, p, m := base.GetCommit(oid)
 		fmt.Printf("commit: %x \n%s\n\n", t, m)
-		oid = p
+		oid = fmt.Sprintf("%x", p)
 	}
 }
 
@@ -103,7 +108,7 @@ func main() {
 		Use:   "log",
 		Short: "log",
 		Run:   logHandler,
-		Args:  cobra.NoArgs,
+		Args:  cobra.MaximumNArgs(1),
 	}
 
 	rootCmd.AddCommand(initCmd)
