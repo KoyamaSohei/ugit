@@ -42,11 +42,7 @@ func readHandler(cmd *cobra.Command, args []string) {
 }
 
 func commitHandler(cmd *cobra.Command, args []string) {
-	dat := base.WriteTree(".")
-	dat = append(dat, []byte{0, 0}...)
-	dat = append(dat, []byte(args[0])...)
-	h := data.HashObject(dat, data.Commit)
-	data.SetHEAD(h)
+	base.Commit(args[0])
 }
 
 func main() {

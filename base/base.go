@@ -125,3 +125,12 @@ func ReadTree(oid string) {
 func isIgnored(path string) bool {
 	return strings.Contains(path, ".git") || strings.Contains(path, ".ugit") || strings.Contains(path, "ugit")
 }
+
+// Commit commit
+func Commit(mes string) {
+	dat := WriteTree(".")
+	dat = append(dat, []byte{0, 0}...)
+	dat = append(dat, []byte(mes)...)
+	h := data.HashObject(dat, data.Commit)
+	data.SetHEAD(h)
+}
