@@ -143,7 +143,8 @@ func GetRefs() ([]string, error) {
 			return err
 		}
 		if !info.IsDir() {
-			refs = append(refs, info.Name())
+			kind := filepath.Base(filepath.Dir(path))
+			refs = append(refs, fmt.Sprintf("%s/%s", kind, info.Name()))
 		}
 		return nil
 	})
