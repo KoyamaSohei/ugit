@@ -143,7 +143,7 @@ func GetRefs() ([]string, error) {
 			return err
 		}
 		if !info.IsDir() {
-			refs = append(refs, path)
+			refs = append(refs, info.Name())
 		}
 		return nil
 	})

@@ -122,9 +122,31 @@ func kHandler(cmd *cobra.Command, args []string) {
 	if err != nil {
 		panic(err)
 	}
+	oidset := make([][]byte, 0)
 	for _, ref := range refs {
 		fmt.Printf("%s\n", ref)
+		b, err := base.GetOid(ref)
+		if err != nil {
+			panic(err)
+		}
+		oidset = append(oidset, b)
 	}
+
+	if oidset, err = base.GetCommitsAndParents(oidset); err != nil {
+		panic(err)
+	}
+
+	for _, oid := range oidset {
+		_, p, _, err := base.GetCommit(oid)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("%x\n", oid)
+		if len(p) > 0 {
+			fmt.Printf("Parent: %x\n\n", p)
+		}
+	}
+
 }
 
 func main() {

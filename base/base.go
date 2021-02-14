@@ -204,3 +204,29 @@ func GetOid(oids string) ([]byte, error) {
 	}
 	return b, nil
 }
+
+// GetCommitsAndParents get commits and parents
+func GetCommitsAndParents(oidset [][]byte) ([][]byte, error) {
+	used := map[string]int{}
+	resset := make([][]byte, 0)
+
+	for len(oidset) > 0 {
+		oid := oidset[0]
+		oidset = oidset[1:]
+		oids := fmt.Sprintf("%x", oid)
+		if _, ok := used[oids]; ok {
+			continue
+		}
+		used[oids] = 0
+		resset = append(resset, oid)
+		_, p, _, err := GetCommit(oid)
+		if err != nil {
+			return nil, err
+		}
+		if len(p) > 0 {
+			oidset = append(oidset, p)
+		}
+	}
+
+	return resset, nil
+}
