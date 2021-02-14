@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 
 	base "github.com/KoyamaSohei/ugit/base"
 	data "github.com/KoyamaSohei/ugit/data"
@@ -123,12 +124,14 @@ func kHandler(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 	oidset := make([][]byte, 0)
+	dot := "digraph commits {\n"
 	for _, ref := range refs {
-		fmt.Printf("%s\n", ref)
 		b, err := base.GetOid(ref)
 		if err != nil {
 			panic(err)
 		}
+		dot += fmt.Sprintf("\"%s\" [shape=note]\n", ref)
+		dot += fmt.Sprintf("\"%s\" -> \"%x\"", ref, b)
 		oidset = append(oidset, b)
 	}
 
@@ -141,12 +144,30 @@ func kHandler(cmd *cobra.Command, args []string) {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("%x\n", oid)
+		dot += fmt.Sprintf("\"%x\" [shape=box style=filled label=\"%x\"]\n", oid, oid[:10])
 		if len(p) > 0 {
-			fmt.Printf("Parent: %x\n\n", p)
+			dot += fmt.Sprintf("\"%x\" -> \"%x\"\n", oid, p)
 		}
 	}
 
+	dot += "}\n"
+
+	viz := exec.Command("dot", "-Tgtk", "/dev/stdin")
+	wc, err := viz.StdinPipe()
+	if err != nil {
+		panic(err)
+	}
+
+	viz.Start()
+	if _, err := wc.Write([]byte(dot)); err != nil {
+		panic(err)
+	}
+	if err := wc.Close(); err != nil {
+		panic(err)
+	}
+	if err := viz.Wait(); err != nil {
+		panic(err)
+	}
 }
 
 func main() {
