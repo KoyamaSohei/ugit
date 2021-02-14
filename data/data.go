@@ -1,6 +1,7 @@
 package data
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"fmt"
 	"io/ioutil"
@@ -24,6 +25,12 @@ const (
 
 // GITDIR is git directory
 const GITDIR = ".ugit"
+
+// Entry is dir's content
+type Entry struct {
+	Oid  []byte
+	Name string
+}
 
 // Init initialize .ugit
 func Init() error {
@@ -95,4 +102,35 @@ func GetRef(name string) ([]byte, error) {
 		return []byte{}, err
 	}
 	return b, nil
+}
+
+// GetTreeEntries get entries
+func GetTreeEntries(oid []byte) ([]Entry, error) {
+	h, err := GetObject(oid, Tree)
+	if err != nil {
+		return nil, err
+	}
+	ents := make([]Entry, 0)
+	o := make([]byte, 0)
+	for k, b := range bytes.Split(h, []byte{0, 0}) {
+		if k%2 == 0 {
+			o = b
+			continue
+		}
+		ents = append(ents, Entry{Oid: o, Name: string(b)})
+	}
+	return ents, nil
+}
+
+// HashTreeEntries set entries
+func HashTreeEntries(ents []Entry) ([]byte, error) {
+	conts := make([]byte, 0)
+	for _, ent := range ents {
+		c := ent.Oid
+		c = append(c, []byte{0, 0}...)
+		c = append(c, []byte(ent.Name)...)
+		c = append(c, []byte{0, 0}...)
+		conts = append(conts, c...)
+	}
+	return HashObject(conts, Tree)
 }

@@ -12,14 +12,9 @@ import (
 	data "github.com/KoyamaSohei/ugit/data"
 )
 
-type entry struct {
-	oid  []byte
-	name string
-}
-
 // WriteTree write tree
 func WriteTree(root string) ([]byte, error) {
-	ents := make([]entry, 0)
+	ents := make([]data.Entry, 0)
 	files, err := ioutil.ReadDir(root)
 	if err != nil {
 		return nil, err
@@ -39,43 +34,17 @@ func WriteTree(root string) ([]byte, error) {
 			if err != nil {
 				return nil, err
 			}
-			ents = append(ents, entry{name: p, oid: h})
+			ents = append(ents, data.Entry{Name: p, Oid: h})
 		} else {
 			h, err := WriteTree(p)
 			if err != nil {
 				return nil, err
 			}
-			ents = append(ents, entry{name: p, oid: h})
+			ents = append(ents, data.Entry{Name: p, Oid: h})
 		}
 	}
 
-	conts := make([]byte, 0)
-	for _, ent := range ents {
-		c := ent.oid
-		c = append(c, []byte{0, 0}...)
-		c = append(c, []byte(ent.name)...)
-		c = append(c, []byte{0, 0}...)
-		conts = append(conts, c...)
-	}
-
-	return data.HashObject(conts, data.Tree)
-}
-
-func iterTreeEntries(oid []byte) ([]entry, error) {
-	h, err := data.GetObject(oid, data.Tree)
-	if err != nil {
-		return nil, err
-	}
-	ents := make([]entry, 0)
-	o := make([]byte, 0)
-	for k, b := range bytes.Split(h, []byte{0, 0}) {
-		if k%2 == 0 {
-			o = b
-			continue
-		}
-		ents = append(ents, entry{oid: o, name: string(b)})
-	}
-	return ents, nil
+	return data.HashTreeEntries(ents)
 }
 
 // ClearDirectory clear dir
@@ -112,33 +81,33 @@ func ReadTree(oid []byte) error {
 	if t, err := data.GetType(oid); err != nil || t != data.Tree {
 		return fmt.Errorf("this object is not tree")
 	}
-	ents, err := iterTreeEntries(oid)
+	ents, err := data.GetTreeEntries(oid)
 	if err != nil {
 		return err
 	}
 	for _, e := range ents {
-		t, err := data.GetType(e.oid)
+		t, err := data.GetType(e.Oid)
 		if err != nil {
 			return err
 		}
 		switch t {
 		case data.Tree:
-			if err := os.MkdirAll(e.name, 0755); err != nil {
+			if err := os.MkdirAll(e.Name, 0755); err != nil {
 				return err
 			}
-			ReadTree(e.oid)
+			ReadTree(e.Oid)
 		case data.Blob:
-			b, err := data.GetObject(e.oid, data.Blob)
+			b, err := data.GetObject(e.Oid, data.Blob)
 			if err != nil {
 				return err
 			}
-			if err := os.MkdirAll(filepath.Dir(e.name), 0755); err != nil {
+			if err := os.MkdirAll(filepath.Dir(e.Name), 0755); err != nil {
 				return err
 			}
-			if err := ioutil.WriteFile(e.name, b, 0644); err != nil {
+			if err := ioutil.WriteFile(e.Name, b, 0644); err != nil {
 				return err
 			}
-			fmt.Printf("%s: %x\n", e.name, e.oid)
+			fmt.Printf("%s: %x\n", e.Name, e.Oid)
 		}
 	}
 	return nil
