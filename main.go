@@ -117,6 +117,16 @@ func tagHandler(cmd *cobra.Command, args []string) {
 	base.CreateTag(args[0], oid)
 }
 
+func kHandler(cmd *cobra.Command, args []string) {
+	refs, err := data.GetRefs()
+	if err != nil {
+		panic(err)
+	}
+	for _, ref := range refs {
+		fmt.Printf("%s\n", ref)
+	}
+}
+
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   "ugit",
@@ -180,6 +190,12 @@ func main() {
 		Run:   tagHandler,
 		Args:  cobra.RangeArgs(1, 2),
 	}
+	kCmd := &cobra.Command{
+		Use:   "k",
+		Short: "k",
+		Run:   kHandler,
+		Args:  cobra.NoArgs,
+	}
 
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(hashCmd)
@@ -190,6 +206,7 @@ func main() {
 	rootCmd.AddCommand(logCmd)
 	rootCmd.AddCommand(checkoutCmd)
 	rootCmd.AddCommand(tagCmd)
+	rootCmd.AddCommand(kCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

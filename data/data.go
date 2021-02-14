@@ -134,3 +134,21 @@ func HashTreeEntries(ents []Entry) ([]byte, error) {
 	}
 	return HashObject(conts, Tree)
 }
+
+// GetRefs get refs
+func GetRefs() ([]string, error) {
+	refs := []string{"HEAD"}
+	err := filepath.Walk(fmt.Sprintf("%s/refs", GITDIR), func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			refs = append(refs, path)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return refs, nil
+}
