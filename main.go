@@ -78,16 +78,16 @@ func logHandler(cmd *cobra.Command, args []string) {
 	if t != data.Commit {
 		panic(fmt.Errorf("hash type is %d,not Commit", t))
 	}
-	for {
-		t, p, m, err := base.GetCommit(oid)
+	oidset, err := base.GetCommitsAndParents([][]byte{oid})
+	if err != nil {
+		panic(err)
+	}
+	for _, o := range oidset {
+		t, _, m, err := base.GetCommit(o)
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("commit: %x\ntree: %x\nmessage: %s\n\n", oid, t, m)
-		if len(p) == 0 {
-			break
-		}
-		oid = p
+		fmt.Printf("Commit  %x\ntree    %x\nmessage %s\n\n", o, t, m)
 	}
 }
 
