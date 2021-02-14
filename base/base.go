@@ -18,12 +18,11 @@ type entry struct {
 }
 
 // WriteTree write tree
-func WriteTree(root string) []byte {
+func WriteTree(root string) ([]byte, error) {
 	ents := make([]entry, 0)
 	files, err := ioutil.ReadDir(root)
-
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	for _, f := range files {
@@ -34,12 +33,18 @@ func WriteTree(root string) []byte {
 		if !f.IsDir() {
 			dat, err := ioutil.ReadFile(p)
 			if err != nil {
-				panic(err)
+				return nil, err
 			}
-			h := data.HashObject(dat, data.Blob)
+			h, err := data.HashObject(dat, data.Blob)
+			if err != nil {
+				return nil, err
+			}
 			ents = append(ents, entry{name: p, oid: h})
 		} else {
-			h := WriteTree(p)
+			h, err := WriteTree(p)
+			if err != nil {
+				return nil, err
+			}
 			ents = append(ents, entry{name: p, oid: h})
 		}
 	}
@@ -56,8 +61,11 @@ func WriteTree(root string) []byte {
 	return data.HashObject(conts, data.Tree)
 }
 
-func iterTreeEntries(oid []byte) []entry {
-	h := data.GetObject(oid, data.Tree)
+func iterTreeEntries(oid []byte) ([]entry, error) {
+	h, err := data.GetObject(oid, data.Tree)
+	if err != nil {
+		return nil, err
+	}
 	ents := make([]entry, 0)
 	o := make([]byte, 0)
 	for k, b := range bytes.Split(h, []byte{0, 0}) {
@@ -67,15 +75,14 @@ func iterTreeEntries(oid []byte) []entry {
 		}
 		ents = append(ents, entry{oid: o, name: string(b)})
 	}
-	return ents
+	return ents, nil
 }
 
 // ClearDirectory clear dir
-func ClearDirectory(root string) {
+func ClearDirectory(root string) error {
 	files, err := ioutil.ReadDir(root)
-
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	for _, f := range files {
@@ -86,40 +93,55 @@ func ClearDirectory(root string) {
 		if !f.IsDir() {
 			fmt.Printf("remove %s\n", p)
 			if err := os.Remove(p); err != nil {
-				panic(err)
+				return err
 			}
 		} else {
-			ClearDirectory(p)
+			if err := ClearDirectory(p); err != nil {
+				return err
+			}
 		}
 	}
 	if err := os.Remove(root); err != nil {
 		fmt.Printf("warn: not empty dir %s\n", root)
 	}
+	return nil
 }
 
 // ReadTree read tree
-func ReadTree(oid []byte) {
-	if data.GetType(oid) != data.Tree {
-		panic(fmt.Errorf("this object is not tree"))
+func ReadTree(oid []byte) error {
+	if t, err := data.GetType(oid); err != nil || t != data.Tree {
+		return fmt.Errorf("this object is not tree")
 	}
-	for _, e := range iterTreeEntries(oid) {
-		switch data.GetType(e.oid) {
+	ents, err := iterTreeEntries(oid)
+	if err != nil {
+		return err
+	}
+	for _, e := range ents {
+		t, err := data.GetType(e.oid)
+		if err != nil {
+			return err
+		}
+		switch t {
 		case data.Tree:
 			if err := os.MkdirAll(e.name, 0755); err != nil {
-				panic(err)
+				return err
 			}
 			ReadTree(e.oid)
 		case data.Blob:
-			b := data.GetObject(e.oid, data.Blob)
+			b, err := data.GetObject(e.oid, data.Blob)
+			if err != nil {
+				return err
+			}
 			if err := os.MkdirAll(filepath.Dir(e.name), 0755); err != nil {
-				panic(err)
+				return err
 			}
 			if err := ioutil.WriteFile(e.name, b, 0644); err != nil {
-				panic(err)
+				return err
 			}
 			fmt.Printf("%s: %x\n", e.name, e.oid)
 		}
 	}
+	return nil
 }
 
 func isIgnored(path string) bool {
@@ -127,38 +149,69 @@ func isIgnored(path string) bool {
 }
 
 // Commit commit
-func Commit(mes string) {
-	dat := WriteTree(".")
+func Commit(mes string) error {
+	dat, err := WriteTree(".")
+	if err != nil {
+		return err
+	}
 	dat = append(dat, []byte{0, 0}...)
-	parent := data.GetRef("HEAD")
+	parent, _ := data.GetRef("HEAD")
 	dat = append(dat, parent...)
 	dat = append(dat, []byte{0, 0}...)
 	dat = append(dat, []byte(mes)...)
-	h := data.HashObject(dat, data.Commit)
-	data.UpdateRef("HEAD", h)
+	h, err := data.HashObject(dat, data.Commit)
+	if err != nil {
+		return err
+	}
+	if err := data.UpdateRef("HEAD", h); err != nil {
+		return err
+	}
+	return nil
 }
 
 // GetCommit get commit
-func GetCommit(oid []byte) ([]byte, []byte, string) {
-	b := data.GetObject(oid, data.Commit)
+func GetCommit(oid []byte) ([]byte, []byte, string, error) {
+	b, err := data.GetObject(oid, data.Commit)
+	if err != nil {
+		return nil, nil, "", err
+	}
 	prop := bytes.Split(b, []byte{0, 0})
-	return prop[0], prop[1], string(prop[2])
+	if len(prop) != 3 {
+		return nil, nil, "", fmt.Errorf("invalid commit")
+	}
+	return prop[0], prop[1], string(prop[2]), nil
 }
 
 // Checkout checkout
-func Checkout(oid []byte) {
-	t, _, _ := GetCommit(oid)
-	ReadTree(t)
+func Checkout(oid []byte) error {
+	t, _, _, err := GetCommit(oid)
+	if err != nil {
+		return err
+	}
+	if err := ReadTree(t); err != nil {
+		return err
+	}
+	return nil
 }
 
 // CreateTag create tag
-func CreateTag(name string, oid []byte) {
+func CreateTag(name string, oid []byte) error {
 	path := fmt.Sprintf("refs/tags/%s", name)
-	data.UpdateRef(path, oid)
+	if err := data.UpdateRef(path, oid); err != nil {
+		return err
+	}
+	return nil
 }
 
 // GetOid get oid
-func GetOid(oids string) []byte {
+func GetOid(oids string) ([]byte, error) {
+	if oids == "@" {
+		b, err := data.GetRef("HEAD")
+		if err != nil {
+			return nil, err
+		}
+		return b, nil
+	}
 	prefixs := []string{
 		"",
 		"refs/",
@@ -167,16 +220,18 @@ func GetOid(oids string) []byte {
 	}
 	for _, p := range prefixs {
 		path := fmt.Sprintf("%s%s", p, oids)
-		if b := data.GetRef(path); len(b) > 0 {
-			return b
+		b, err := data.GetRef(path)
+		if err != nil {
+			continue
 		}
+		return b, nil
 	}
 	if len(oids) != 40 {
-		panic(fmt.Errorf("Unknown name %s", oids))
+		return nil, fmt.Errorf("Unknown name %s", oids)
 	}
 	b, err := hex.DecodeString(oids)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return b
+	return b, nil
 }

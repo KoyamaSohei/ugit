@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/hex"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -23,23 +22,40 @@ func hashHandler(cmd *cobra.Command, args []string) {
 	if err != nil {
 		panic(err)
 	}
-	h := data.HashObject(dat, data.Blob)
+	h, err := data.HashObject(dat, data.Blob)
+	if err != nil {
+		panic(err)
+	}
 	fmt.Printf("%x", h)
 }
 
 func catHandler(cmd *cobra.Command, args []string) {
-	b := data.GetObject(base.GetOid(args[0]), data.None)
+	oid, err := base.GetOid(args[0])
+	if err != nil {
+		panic(err)
+	}
+	b, err := data.GetObject(oid, data.None)
+	if err != nil {
+		panic(err)
+	}
 	fmt.Printf("%s", string(b))
 }
 
 func writeHandler(cmd *cobra.Command, args []string) {
-	h := base.WriteTree(".")
+	h, err := base.WriteTree(".")
+	if err != nil {
+		panic(err)
+	}
 	fmt.Printf("%x\n", h)
 }
 
 func readHandler(cmd *cobra.Command, args []string) {
+	oid, err := base.GetOid(args[0])
+	if err != nil {
+		panic(err)
+	}
 	base.ClearDirectory(".")
-	base.ReadTree(base.GetOid(args[0]))
+	base.ReadTree(oid)
 }
 
 func commitHandler(cmd *cobra.Command, args []string) {
@@ -47,15 +63,25 @@ func commitHandler(cmd *cobra.Command, args []string) {
 }
 
 func logHandler(cmd *cobra.Command, args []string) {
-	oid := data.GetRef("HEAD")
-	if len(args) == 1 {
-		oid = base.GetOid(args[0])
-		if data.GetType(oid) != data.Commit {
-			panic(fmt.Errorf("hash type is %d,not Commit", data.GetType(oid)))
-		}
+	if len(args) == 0 {
+		args = append(args, "@")
+	}
+	oid, err := base.GetOid(args[0])
+	if err != nil {
+		panic(err)
+	}
+	t, err := data.GetType(oid)
+	if err != nil {
+		panic(err)
+	}
+	if t != data.Commit {
+		panic(fmt.Errorf("hash type is %d,not Commit", t))
 	}
 	for {
-		t, p, m := base.GetCommit(oid)
+		t, p, m, err := base.GetCommit(oid)
+		if err != nil {
+			panic(err)
+		}
 		fmt.Printf("commit: %x\ntree: %x\nmessage: %s\n\n", oid, t, m)
 		if len(p) == 0 {
 			break
@@ -65,9 +91,16 @@ func logHandler(cmd *cobra.Command, args []string) {
 }
 
 func checkoutHandler(cmd *cobra.Command, args []string) {
-	oid := base.GetOid(args[0])
-	if data.GetType(oid) != data.Commit {
-		panic(fmt.Errorf("hash type is %d,not Commit", data.GetType(oid)))
+	oid, err := base.GetOid(args[0])
+	if err != nil {
+		panic(err)
+	}
+	t, err := data.GetType(oid)
+	if err != nil {
+		panic(err)
+	}
+	if t != data.Commit {
+		panic(fmt.Errorf("hash type is %d,not Commit", t))
 	}
 	base.ClearDirectory(".")
 	base.Checkout(oid)
@@ -75,10 +108,9 @@ func checkoutHandler(cmd *cobra.Command, args []string) {
 
 func tagHandler(cmd *cobra.Command, args []string) {
 	if len(args) == 1 {
-		base.CreateTag(args[0], data.GetRef("HEAD"))
-		return
+		args = append(args, "@")
 	}
-	oid, err := hex.DecodeString(args[1])
+	oid, err := base.GetOid(args[1])
 	if err != nil {
 		panic(err)
 	}
