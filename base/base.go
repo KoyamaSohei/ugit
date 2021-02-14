@@ -230,3 +230,9 @@ func GetCommitsAndParents(oidset [][]byte) ([][]byte, error) {
 
 	return resset, nil
 }
+
+// CreateBranch create branch
+func CreateBranch(name string, oid []byte) error {
+	path := fmt.Sprintf("refs/heads/%s", name)
+	return data.UpdateRef(path, oid)
+}

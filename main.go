@@ -170,6 +170,19 @@ func kHandler(cmd *cobra.Command, args []string) {
 	}
 }
 
+func branchHandler(cmd *cobra.Command, args []string) {
+	if len(args) == 1 {
+		args = append(args, "@")
+	}
+	oid, err := base.GetOid(args[1])
+	if err != nil {
+		panic(err)
+	}
+	if err := base.CreateBranch(args[0], oid); err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   "ugit",
@@ -239,6 +252,12 @@ func main() {
 		Run:   kHandler,
 		Args:  cobra.NoArgs,
 	}
+	branchCmd := &cobra.Command{
+		Use:   "branch",
+		Short: "branch",
+		Run:   branchHandler,
+		Args:  cobra.RangeArgs(1, 2),
+	}
 
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(hashCmd)
@@ -250,6 +269,7 @@ func main() {
 	rootCmd.AddCommand(checkoutCmd)
 	rootCmd.AddCommand(tagCmd)
 	rootCmd.AddCommand(kCmd)
+	rootCmd.AddCommand(branchCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
