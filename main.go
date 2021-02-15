@@ -217,6 +217,16 @@ func statusHandler(cmd *cobra.Command, args []string) {
 	fmt.Printf("HEAD detached at %x\n", head[:10])
 }
 
+func resetHandler(cmd *cobra.Command, args []string) {
+	oid, err := base.GetOid(args[0])
+	if err != nil {
+		panic(err)
+	}
+	if err := data.UpdateRef("HEAD", data.RefValue{Symblic: false, Value: oid}, true); err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   "ugit",
@@ -298,6 +308,12 @@ func main() {
 		Run:   statusHandler,
 		Args:  cobra.NoArgs,
 	}
+	resetCmd := &cobra.Command{
+		Use:   "reset",
+		Short: "reset",
+		Run:   resetHandler,
+		Args:  cobra.ExactArgs(1),
+	}
 
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(hashCmd)
@@ -311,6 +327,7 @@ func main() {
 	rootCmd.AddCommand(kCmd)
 	rootCmd.AddCommand(branchCmd)
 	rootCmd.AddCommand(statusCmd)
+	rootCmd.AddCommand(resetCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
