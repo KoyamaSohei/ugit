@@ -272,7 +272,7 @@ func GetBranchName() (string, error) {
 	if !head.Symblic {
 		return "", nil
 	}
-	return filepath.Base(string(head.Value)), nil
+	return string(head.Value), nil
 }
 
 // GetBranchNames get branch list
