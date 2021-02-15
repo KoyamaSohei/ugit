@@ -124,6 +124,7 @@ func getRef(name string, deref bool) (string, RefValue, error) {
 		if deref {
 			return getRef(fmt.Sprintf("%s", s[1]), deref)
 		}
+		return name, RefValue{Symblic: true, Value: s[1]}, nil
 	}
 	return name, RefValue{Symblic: false, Value: b}, nil
 }
@@ -177,7 +178,7 @@ func GetRefs() ([]string, error) {
 		}
 		if !info.IsDir() {
 			kind := filepath.Base(filepath.Dir(path))
-			refs = append(refs, fmt.Sprintf("%s/%s", kind, info.Name()))
+			refs = append(refs, fmt.Sprintf("refs/%s/%s", kind, info.Name()))
 		}
 		return nil
 	})

@@ -115,13 +115,19 @@ func kHandler(cmd *cobra.Command, args []string) {
 	oidset := make([][]byte, 0)
 	dot := "digraph commits {\n"
 	for _, ref := range refs {
-		b, err := base.GetOid(ref)
+		r, err := data.GetRef(ref, false)
+		fmt.Printf("ref %s Symblic %t %x\n", ref, r.Symblic, r.Value)
 		if err != nil {
 			panic(err)
 		}
+		if r.Symblic {
+			dot += fmt.Sprintf("\"%s\" [shape=note]\n", ref)
+			dot += fmt.Sprintf("\"%s\" -> \"%s\"", ref, r.Value)
+			continue
+		}
 		dot += fmt.Sprintf("\"%s\" [shape=note]\n", ref)
-		dot += fmt.Sprintf("\"%s\" -> \"%x\"", ref, b)
-		oidset = append(oidset, b)
+		dot += fmt.Sprintf("\"%s\" -> \"%x\"", ref, r.Value)
+		oidset = append(oidset, r.Value)
 	}
 
 	if oidset, err = base.GetCommitsAndParents(oidset); err != nil {

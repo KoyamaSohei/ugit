@@ -168,7 +168,7 @@ func Checkout(name string) error {
 	if isBranch(name) {
 		head = data.RefValue{Symblic: true, Value: []byte(fmt.Sprintf("refs/heads/%s", name))}
 	}
-	return data.UpdateRef("HEAD", head, true)
+	return data.UpdateRef("HEAD", head, false)
 }
 
 // CreateTag create tag
@@ -197,7 +197,7 @@ func GetOid(oids string) ([]byte, error) {
 	}
 	for _, p := range prefixs {
 		path := fmt.Sprintf("%s%s", p, oids)
-		b, err := data.GetRef(path, false)
+		b, err := data.GetRef(path, true)
 		if err != nil {
 			continue
 		}
