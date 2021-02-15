@@ -96,11 +96,14 @@ func GetType(oid []byte) (Type, error) {
 
 // UpdateRef update ref
 func UpdateRef(name string, ref RefValue, deref bool) error {
-	n, _, err := getRef(name, true)
+	n, _, err := getRef(name, deref)
 	if err != nil {
 		return err
 	}
 	name = n
+	if ref.Symblic {
+		ref.Value = []byte(fmt.Sprintf("ref:%x", ref.Value))
+	}
 	path := fmt.Sprintf("%s/%s", GITDIR, name)
 	if err := ioutil.WriteFile(path, ref.Value, 0644); err != nil {
 		return err
