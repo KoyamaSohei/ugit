@@ -46,6 +46,12 @@ func Init() error {
 	if err := os.MkdirAll(fmt.Sprintf("%s/objects", GITDIR), 0755); err != nil {
 		return err
 	}
+	if err := os.MkdirAll(fmt.Sprintf("%s/refs/tags", GITDIR), 0755); err != nil {
+		return err
+	}
+	if err := os.MkdirAll(fmt.Sprintf("%s/refs/heads", GITDIR), 0755); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -96,9 +102,6 @@ func UpdateRef(name string, ref RefValue) error {
 	}
 	name = n
 	path := fmt.Sprintf("%s/%s", GITDIR, name)
-	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
-		return err
-	}
 	if err := ioutil.WriteFile(path, ref.Value, 0644); err != nil {
 		return err
 	}
