@@ -161,6 +161,9 @@ func Checkout(name string) error {
 	if err != nil {
 		return err
 	}
+	if err := ClearDirectory("."); err != nil {
+		panic(err)
+	}
 	if err := ReadTree(t); err != nil {
 		return err
 	}

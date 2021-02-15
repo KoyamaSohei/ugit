@@ -92,8 +92,9 @@ func logHandler(cmd *cobra.Command, args []string) {
 }
 
 func checkoutHandler(cmd *cobra.Command, args []string) {
-	base.ClearDirectory(".")
-	base.Checkout(args[0])
+	if err := base.Checkout(args[0]); err != nil {
+		panic(err)
+	}
 }
 
 func tagHandler(cmd *cobra.Command, args []string) {
