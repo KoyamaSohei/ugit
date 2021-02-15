@@ -192,7 +192,7 @@ func CreateTag(name string, oid []byte) error {
 // GetOid get oid
 func GetOid(oids string) ([]byte, error) {
 	if oids == "@" {
-		b, err := data.GetRef("HEAD", true)
+		b, err := data.GetRef("HEAD", false)
 		if err != nil {
 			return nil, err
 		}
@@ -206,7 +206,7 @@ func GetOid(oids string) ([]byte, error) {
 	}
 	for _, p := range prefixs {
 		path := fmt.Sprintf("%s%s", p, oids)
-		b, err := data.GetRef(path, true)
+		b, err := data.GetRef(path, false)
 		if err != nil {
 			continue
 		}
@@ -261,4 +261,16 @@ func isBranch(branch string) bool {
 		return false
 	}
 	return true
+}
+
+// GetBranchName get branch
+func GetBranchName() (string, error) {
+	head, err := data.GetRef("HEAD", false)
+	if err != nil {
+		return "", err
+	}
+	if !head.Symblic {
+		return "", nil
+	}
+	return filepath.Base(string(head.Value)), nil
 }

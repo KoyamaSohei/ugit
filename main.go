@@ -177,6 +177,22 @@ func branchHandler(cmd *cobra.Command, args []string) {
 	}
 }
 
+func statusHandler(cmd *cobra.Command, args []string) {
+	head, err := base.GetOid("@")
+	if err != nil {
+		panic(err)
+	}
+	b, err := base.GetBranchName()
+	if err != nil {
+		panic(err)
+	}
+	if len(b) > 0 {
+		fmt.Printf("On branch %s\n", b)
+		return
+	}
+	fmt.Printf("HEAD detached at %x\n", head[:10])
+}
+
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   "ugit",
@@ -252,6 +268,12 @@ func main() {
 		Run:   branchHandler,
 		Args:  cobra.RangeArgs(1, 2),
 	}
+	statusCmd := &cobra.Command{
+		Use:   "status",
+		Short: "status",
+		Run:   statusHandler,
+		Args:  cobra.NoArgs,
+	}
 
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(hashCmd)
@@ -264,6 +286,7 @@ func main() {
 	rootCmd.AddCommand(tagCmd)
 	rootCmd.AddCommand(kCmd)
 	rootCmd.AddCommand(branchCmd)
+	rootCmd.AddCommand(statusCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
