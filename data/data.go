@@ -96,11 +96,9 @@ func GetType(oid []byte) (Type, error) {
 
 // UpdateRef update ref
 func UpdateRef(name string, ref RefValue, deref bool) error {
-	n, _, err := getRef(name, deref)
-	if err != nil {
-		return err
+	if n, _, err := getRef(name, deref); err == nil {
+		name = n
 	}
-	name = n
 	if ref.Symblic {
 		ref.Value = []byte(fmt.Sprintf("ref:%x", ref.Value))
 	}
