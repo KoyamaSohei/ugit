@@ -95,8 +95,8 @@ func GetType(oid []byte) (Type, error) {
 }
 
 // UpdateRef update ref
-func UpdateRef(name string, ref RefValue) error {
-	n, _, err := getRef(name)
+func UpdateRef(name string, ref RefValue, deref bool) error {
+	n, _, err := getRef(name, true)
 	if err != nil {
 		return err
 	}
@@ -108,7 +108,7 @@ func UpdateRef(name string, ref RefValue) error {
 	return nil
 }
 
-func getRef(name string) (string, RefValue, error) {
+func getRef(name string, deref bool) (string, RefValue, error) {
 	path := fmt.Sprintf("%s/%s", GITDIR, name)
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -120,14 +120,16 @@ func getRef(name string) (string, RefValue, error) {
 		if len(s) != 2 {
 			return "", RefValue{}, fmt.Errorf("invalid format")
 		}
-		return getRef(fmt.Sprintf("%s", s[1]))
+		if deref {
+			return getRef(fmt.Sprintf("%s", s[1]), deref)
+		}
 	}
 	return name, RefValue{Symblic: false, Value: b}, nil
 }
 
 // GetRef get ref
-func GetRef(name string) (RefValue, error) {
-	_, r, err := getRef(name)
+func GetRef(name string, deref bool) (RefValue, error) {
+	_, r, err := getRef(name, deref)
 	if err != nil {
 		return RefValue{}, err
 	}

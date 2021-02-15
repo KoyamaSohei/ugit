@@ -124,7 +124,7 @@ func Commit(mes string) error {
 		return err
 	}
 	dat = append(dat, []byte{0, 0}...)
-	parent, _ := data.GetRef("HEAD")
+	parent, _ := data.GetRef("HEAD", true)
 	dat = append(dat, parent.Value...)
 	dat = append(dat, []byte{0, 0}...)
 	dat = append(dat, []byte(mes)...)
@@ -132,7 +132,7 @@ func Commit(mes string) error {
 	if err != nil {
 		return err
 	}
-	if err := data.UpdateRef("HEAD", data.RefValue{Symblic: false, Value: h}); err != nil {
+	if err := data.UpdateRef("HEAD", data.RefValue{Symblic: false, Value: h}, true); err != nil {
 		return err
 	}
 	return nil
@@ -166,7 +166,7 @@ func Checkout(oid []byte) error {
 // CreateTag create tag
 func CreateTag(name string, oid []byte) error {
 	path := fmt.Sprintf("refs/tags/%s", name)
-	if err := data.UpdateRef(path, data.RefValue{Symblic: false, Value: oid}); err != nil {
+	if err := data.UpdateRef(path, data.RefValue{Symblic: false, Value: oid}, true); err != nil {
 		return err
 	}
 	return nil
@@ -175,7 +175,7 @@ func CreateTag(name string, oid []byte) error {
 // GetOid get oid
 func GetOid(oids string) ([]byte, error) {
 	if oids == "@" {
-		b, err := data.GetRef("HEAD")
+		b, err := data.GetRef("HEAD", true)
 		if err != nil {
 			return nil, err
 		}
@@ -189,7 +189,7 @@ func GetOid(oids string) ([]byte, error) {
 	}
 	for _, p := range prefixs {
 		path := fmt.Sprintf("%s%s", p, oids)
-		b, err := data.GetRef(path)
+		b, err := data.GetRef(path, false)
 		if err != nil {
 			continue
 		}
@@ -234,5 +234,5 @@ func GetCommitsAndParents(oidset [][]byte) ([][]byte, error) {
 // CreateBranch create branch
 func CreateBranch(name string, oid []byte) error {
 	path := fmt.Sprintf("refs/heads/%s", name)
-	return data.UpdateRef(path, data.RefValue{Symblic: false, Value: oid})
+	return data.UpdateRef(path, data.RefValue{Symblic: false, Value: oid}, true)
 }
