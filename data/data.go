@@ -101,6 +101,14 @@ func GetRef(name string) ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
+	r := []byte("ref:")
+	if bytes.HasPrefix(b, r) {
+		s := bytes.Split(b, r)
+		if len(s) != 2 {
+			return nil, fmt.Errorf("invalid format")
+		}
+		return GetRef(fmt.Sprintf("%s", s[1]))
+	}
 	return b, nil
 }
 
