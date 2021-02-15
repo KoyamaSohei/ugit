@@ -15,7 +15,6 @@ import (
 // Init initialize ugit
 func Init() {
 	data.Init()
-	data.UpdateRef("HEAD", data.RefValue{Symblic: true, Value: []byte("refs/heads/master")}, true)
 }
 
 // WriteTree write tree
@@ -194,7 +193,7 @@ func GetOid(oids string) ([]byte, error) {
 	if oids == "@" {
 		b, err := data.GetRef("HEAD", true)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("ugit is empty")
 		}
 		return b.Value, nil
 	}
