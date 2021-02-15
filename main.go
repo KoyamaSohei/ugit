@@ -117,7 +117,6 @@ func kHandler(cmd *cobra.Command, args []string) {
 	dot := "digraph commits {\n"
 	for _, ref := range refs {
 		r, err := data.GetRef(ref, false)
-		fmt.Printf("ref %s Symblic %t %x\n", ref, r.Symblic, r.Value)
 		if err != nil {
 			panic(err)
 		}
