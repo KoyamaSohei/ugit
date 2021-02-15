@@ -100,7 +100,7 @@ func UpdateRef(name string, ref RefValue, deref bool) error {
 		name = n
 	}
 	if ref.Symblic {
-		ref.Value = []byte(fmt.Sprintf("ref:%x", ref.Value))
+		ref.Value = []byte(fmt.Sprintf("ref:%s", string(ref.Value)))
 	}
 	path := fmt.Sprintf("%s/%s", GITDIR, name)
 	if err := ioutil.WriteFile(path, ref.Value, 0644); err != nil {
