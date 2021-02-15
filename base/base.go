@@ -192,7 +192,7 @@ func CreateTag(name string, oid []byte) error {
 // GetOid get oid
 func GetOid(oids string) ([]byte, error) {
 	if oids == "@" {
-		b, err := data.GetRef("HEAD", false)
+		b, err := data.GetRef("HEAD", true)
 		if err != nil {
 			return nil, err
 		}
@@ -206,7 +206,7 @@ func GetOid(oids string) ([]byte, error) {
 	}
 	for _, p := range prefixs {
 		path := fmt.Sprintf("%s%s", p, oids)
-		b, err := data.GetRef(path, false)
+		b, err := data.GetRef(path, true)
 		if err != nil {
 			continue
 		}
