@@ -152,7 +152,11 @@ func GetCommit(oid []byte) ([]byte, []byte, string, error) {
 }
 
 // Checkout checkout
-func Checkout(oid []byte) error {
+func Checkout(name string) error {
+	oid, err := GetOid(name)
+	if err != nil {
+		return err
+	}
 	t, _, _, err := GetCommit(oid)
 	if err != nil {
 		return err
@@ -160,7 +164,11 @@ func Checkout(oid []byte) error {
 	if err := ReadTree(t); err != nil {
 		return err
 	}
-	return nil
+	head := data.RefValue{Symblic: false, Value: oid}
+	if isBranch(name) {
+		head = data.RefValue{Symblic: true, Value: []byte(fmt.Sprintf("refs/heads/%s", name))}
+	}
+	return data.UpdateRef("HEAD", head, false)
 }
 
 // CreateTag create tag
@@ -235,4 +243,13 @@ func GetCommitsAndParents(oidset [][]byte) ([][]byte, error) {
 func CreateBranch(name string, oid []byte) error {
 	path := fmt.Sprintf("refs/heads/%s", name)
 	return data.UpdateRef(path, data.RefValue{Symblic: false, Value: oid}, true)
+}
+
+func isBranch(branch string) bool {
+	path := fmt.Sprintf("refs/heads/%s", branch)
+	_, err := data.GetRef(path, true)
+	if err != nil {
+		return false
+	}
+	return true
 }

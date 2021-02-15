@@ -92,19 +92,8 @@ func logHandler(cmd *cobra.Command, args []string) {
 }
 
 func checkoutHandler(cmd *cobra.Command, args []string) {
-	oid, err := base.GetOid(args[0])
-	if err != nil {
-		panic(err)
-	}
-	t, err := data.GetType(oid)
-	if err != nil {
-		panic(err)
-	}
-	if t != data.Commit {
-		panic(fmt.Errorf("hash type is %d,not Commit", t))
-	}
 	base.ClearDirectory(".")
-	base.Checkout(oid)
+	base.Checkout(args[0])
 }
 
 func tagHandler(cmd *cobra.Command, args []string) {
