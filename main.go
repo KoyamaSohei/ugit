@@ -108,25 +108,21 @@ func tagHandler(cmd *cobra.Command, args []string) {
 }
 
 func kHandler(cmd *cobra.Command, args []string) {
-	refs, err := data.GetRefs()
+	names, refs, err := data.GetRefs("", false)
 	if err != nil {
 		panic(err)
 	}
 	oidset := make([][]byte, 0)
 	dot := "digraph commits {\n"
-	for _, ref := range refs {
-		r, err := data.GetRef(ref, false)
-		if err != nil {
-			panic(err)
-		}
-		if r.Symblic {
-			dot += fmt.Sprintf("\"%s\" [shape=note]\n", ref)
-			dot += fmt.Sprintf("\"%s\" -> \"%s\"", ref, r.Value)
+	for i, ref := range refs {
+		if ref.Symblic {
+			dot += fmt.Sprintf("\"%s\" [shape=note]\n", names[i])
+			dot += fmt.Sprintf("\"%s\" -> \"%s\"", names[i], ref.Value)
 			continue
 		}
-		dot += fmt.Sprintf("\"%s\" [shape=note]\n", ref)
-		dot += fmt.Sprintf("\"%s\" -> \"%x\"", ref, r.Value)
-		oidset = append(oidset, r.Value)
+		dot += fmt.Sprintf("\"%s\" [shape=note]\n", names[i])
+		dot += fmt.Sprintf("\"%s\" -> \"%x\"", names[i], ref.Value)
+		oidset = append(oidset, ref.Value)
 	}
 
 	if oidset, err = base.GetCommitsAndParents(oidset); err != nil {
@@ -165,6 +161,20 @@ func kHandler(cmd *cobra.Command, args []string) {
 }
 
 func branchHandler(cmd *cobra.Command, args []string) {
+	if len(args) == 0 {
+		c, err := base.GetBranchName()
+		if err != nil {
+			panic(err)
+		}
+		bs, err := base.GetBranchNames()
+		if err != nil {
+			panic(err)
+		}
+		for _, b := range bs {
+			fmt.Printf("%t %s\n", b == c, b)
+		}
+		return
+	}
 	if len(args) == 1 {
 		args = append(args, "@")
 	}
@@ -266,7 +276,7 @@ func main() {
 		Use:   "branch",
 		Short: "branch",
 		Run:   branchHandler,
-		Args:  cobra.RangeArgs(1, 2),
+		Args:  cobra.MaximumNArgs(2),
 	}
 	statusCmd := &cobra.Command{
 		Use:   "status",

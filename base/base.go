@@ -274,3 +274,9 @@ func GetBranchName() (string, error) {
 	}
 	return filepath.Base(string(head.Value)), nil
 }
+
+// GetBranchNames get branch list
+func GetBranchNames() ([]string, error) {
+	name, _, err := data.GetRefs("refs/heads", false)
+	return name, err
+}

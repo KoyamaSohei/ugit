@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Type is data type
@@ -170,20 +171,33 @@ func HashTreeEntries(ents []Entry) ([]byte, error) {
 }
 
 // GetRefs get refs
-func GetRefs() ([]string, error) {
-	refs := []string{"HEAD"}
+func GetRefs(prefix string, deref bool) ([]string, []RefValue, error) {
+	names := []string{"HEAD"}
 	err := filepath.Walk(fmt.Sprintf("%s/refs", GITDIR), func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 		if !info.IsDir() {
 			kind := filepath.Base(filepath.Dir(path))
-			refs = append(refs, fmt.Sprintf("refs/%s/%s", kind, info.Name()))
+			names = append(names, fmt.Sprintf("refs/%s/%s", kind, info.Name()))
 		}
 		return nil
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return refs, nil
+	refnames := []string{}
+	refs := []RefValue{}
+	for _, name := range names {
+		if !strings.HasPrefix(name, prefix) {
+			continue
+		}
+		r, err := GetRef(name, deref)
+		if err != nil {
+			return nil, nil, err
+		}
+		refnames = append(refnames, name)
+		refs = append(refs, r)
+	}
+	return refnames, refs, nil
 }
