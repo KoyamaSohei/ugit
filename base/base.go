@@ -125,14 +125,14 @@ func Commit(mes string) error {
 	}
 	dat = append(dat, []byte{0, 0}...)
 	parent, _ := data.GetRef("HEAD")
-	dat = append(dat, parent...)
+	dat = append(dat, parent.Value...)
 	dat = append(dat, []byte{0, 0}...)
 	dat = append(dat, []byte(mes)...)
 	h, err := data.HashObject(dat, data.Commit)
 	if err != nil {
 		return err
 	}
-	if err := data.UpdateRef("HEAD", h); err != nil {
+	if err := data.UpdateRef("HEAD", data.RefValue{Symblic: false, Value: h}); err != nil {
 		return err
 	}
 	return nil
@@ -166,7 +166,7 @@ func Checkout(oid []byte) error {
 // CreateTag create tag
 func CreateTag(name string, oid []byte) error {
 	path := fmt.Sprintf("refs/tags/%s", name)
-	if err := data.UpdateRef(path, oid); err != nil {
+	if err := data.UpdateRef(path, data.RefValue{Symblic: false, Value: oid}); err != nil {
 		return err
 	}
 	return nil
@@ -179,7 +179,7 @@ func GetOid(oids string) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		return b, nil
+		return b.Value, nil
 	}
 	prefixs := []string{
 		"",
@@ -193,7 +193,7 @@ func GetOid(oids string) ([]byte, error) {
 		if err != nil {
 			continue
 		}
-		return b, nil
+		return b.Value, nil
 	}
 	if len(oids) != 40 {
 		return nil, fmt.Errorf("Unknown name %s", oids)
@@ -234,5 +234,5 @@ func GetCommitsAndParents(oidset [][]byte) ([][]byte, error) {
 // CreateBranch create branch
 func CreateBranch(name string, oid []byte) error {
 	path := fmt.Sprintf("refs/heads/%s", name)
-	return data.UpdateRef(path, oid)
+	return data.UpdateRef(path, data.RefValue{Symblic: false, Value: oid})
 }

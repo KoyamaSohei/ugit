@@ -32,6 +32,12 @@ type Entry struct {
 	Name string
 }
 
+// RefValue is ref container
+type RefValue struct {
+	Symblic bool
+	Value   []byte
+}
+
 // Init initialize .ugit
 func Init() error {
 	if err := os.MkdirAll(GITDIR, 0755); err != nil {
@@ -83,33 +89,36 @@ func GetType(oid []byte) (Type, error) {
 }
 
 // UpdateRef update ref
-func UpdateRef(name string, oid []byte) error {
+func UpdateRef(name string, ref RefValue) error {
+	if ref.Symblic {
+		return fmt.Errorf("cannnot update Symblic ref")
+	}
 	path := fmt.Sprintf("%s/%s", GITDIR, name)
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 		return err
 	}
-	if err := ioutil.WriteFile(path, oid, 0644); err != nil {
+	if err := ioutil.WriteFile(path, ref.Value, 0644); err != nil {
 		return err
 	}
 	return nil
 }
 
 // GetRef get ref
-func GetRef(name string) ([]byte, error) {
+func GetRef(name string) (RefValue, error) {
 	path := fmt.Sprintf("%s/%s", GITDIR, name)
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
-		return []byte{}, err
+		return RefValue{}, err
 	}
 	r := []byte("ref:")
 	if bytes.HasPrefix(b, r) {
 		s := bytes.Split(b, r)
 		if len(s) != 2 {
-			return nil, fmt.Errorf("invalid format")
+			return RefValue{}, fmt.Errorf("invalid format")
 		}
 		return GetRef(fmt.Sprintf("%s", s[1]))
 	}
-	return b, nil
+	return RefValue{false, b}, nil
 }
 
 // GetTreeEntries get entries
