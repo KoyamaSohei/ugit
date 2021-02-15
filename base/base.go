@@ -12,6 +12,12 @@ import (
 	data "github.com/KoyamaSohei/ugit/data"
 )
 
+// Init initialize ugit
+func Init() {
+	data.Init()
+	data.UpdateRef("HEAD", data.RefValue{Symblic: true, Value: []byte("refs/heads/master")}, true)
+}
+
 // WriteTree write tree
 func WriteTree(root string) ([]byte, error) {
 	ents := make([]data.Entry, 0)

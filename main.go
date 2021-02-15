@@ -12,8 +12,7 @@ import (
 )
 
 func initHandler(cmd *cobra.Command, args []string) {
-	fmt.Printf("Hello,World\n")
-	data.Init()
+	base.Init()
 	pwd, _ := os.Getwd()
 	fmt.Printf("Initialized empty ugit repository in %s/%s\n", pwd, data.GITDIR)
 }
