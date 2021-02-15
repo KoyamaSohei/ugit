@@ -90,9 +90,11 @@ func GetType(oid []byte) (Type, error) {
 
 // UpdateRef update ref
 func UpdateRef(name string, ref RefValue) error {
-	if ref.Symblic {
-		return fmt.Errorf("cannnot update Symblic ref")
+	n, _, err := getRef(name)
+	if err != nil {
+		return err
 	}
+	name = n
 	path := fmt.Sprintf("%s/%s", GITDIR, name)
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 		return err
@@ -103,22 +105,30 @@ func UpdateRef(name string, ref RefValue) error {
 	return nil
 }
 
-// GetRef get ref
-func GetRef(name string) (RefValue, error) {
+func getRef(name string) (string, RefValue, error) {
 	path := fmt.Sprintf("%s/%s", GITDIR, name)
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
-		return RefValue{}, err
+		return "", RefValue{}, err
 	}
 	r := []byte("ref:")
 	if bytes.HasPrefix(b, r) {
 		s := bytes.Split(b, r)
 		if len(s) != 2 {
-			return RefValue{}, fmt.Errorf("invalid format")
+			return "", RefValue{}, fmt.Errorf("invalid format")
 		}
-		return GetRef(fmt.Sprintf("%s", s[1]))
+		return getRef(fmt.Sprintf("%s", s[1]))
 	}
-	return RefValue{false, b}, nil
+	return name, RefValue{Symblic: false, Value: b}, nil
+}
+
+// GetRef get ref
+func GetRef(name string) (RefValue, error) {
+	_, r, err := getRef(name)
+	if err != nil {
+		return RefValue{}, err
+	}
+	return r, nil
 }
 
 // GetTreeEntries get entries
