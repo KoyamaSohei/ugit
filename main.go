@@ -247,6 +247,29 @@ func showHandler(cmd *cobra.Command, args []string) {
 	fmt.Printf("%s", out)
 }
 
+func diffHandler(cmd *cobra.Command, args []string) {
+	if len(args) == 0 {
+		args = append(args, "@")
+	}
+	oid, err := base.GetOid(args[0])
+	if err != nil {
+		panic(err)
+	}
+	t, _, _, err := base.GetCommit(oid)
+	if err != nil {
+		panic(err)
+	}
+	nt, err := base.WriteTree(".")
+	if err != nil {
+		panic(err)
+	}
+	out, err := diff.GetTreesDiff(t, nt)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%s", out)
+}
+
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   "ugit",
@@ -340,6 +363,12 @@ func main() {
 		Run:   showHandler,
 		Args:  cobra.ExactArgs(1),
 	}
+	diffCmd := &cobra.Command{
+		Use:   "diff",
+		Short: "diff",
+		Run:   diffHandler,
+		Args:  cobra.MaximumNArgs(1),
+	}
 
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(hashCmd)
@@ -355,6 +384,7 @@ func main() {
 	rootCmd.AddCommand(statusCmd)
 	rootCmd.AddCommand(resetCmd)
 	rootCmd.AddCommand(showCmd)
+	rootCmd.AddCommand(diffCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
