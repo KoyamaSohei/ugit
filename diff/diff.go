@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	data "github.com/KoyamaSohei/ugit/data"
 )
@@ -19,14 +20,14 @@ func getBlobsDiff(poid, noid []byte, name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	pname := fmt.Sprintf("a/%s", name)
-	ptmp, err := ioutil.TempFile("", pname)
+	pname := fmt.Sprintf("%s.prev", filepath.Base(name))
+	ptmp, err := ioutil.TempFile(filepath.Dir(name), pname)
 	if err != nil {
 		return "", err
 	}
 	defer os.Remove(ptmp.Name())
-	nname := fmt.Sprintf("b/%s", name)
-	ntmp, err := ioutil.TempFile("", nname)
+	nname := fmt.Sprintf("%s.next", filepath.Base(name))
+	ntmp, err := ioutil.TempFile(filepath.Dir(name), nname)
 	if err != nil {
 		return "", err
 	}
@@ -38,10 +39,7 @@ func getBlobsDiff(poid, noid []byte, name string) (string, error) {
 		return "", err
 	}
 	diff := exec.Command("diff", "--unified", "--show-c-function", "--label", pname, ptmp.Name(), "--label", nname, ntmp.Name())
-	out, err := diff.Output()
-	if err != nil {
-		return "", err
-	}
+	out, _ := diff.Output()
 	return string(out), nil
 }
 
