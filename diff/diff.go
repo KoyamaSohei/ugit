@@ -84,6 +84,7 @@ func GetTreesDiff(ptoid, ntoid []byte) (string, error) {
 				return "", err
 			}
 			out += cout
+			continue
 		}
 		if pt != data.Tree || nt != data.Tree {
 			out += fmt.Sprintf("mod file %s\n", e.Name)
