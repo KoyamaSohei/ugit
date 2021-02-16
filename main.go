@@ -206,9 +206,23 @@ func statusHandler(cmd *cobra.Command, args []string) {
 	}
 	if len(b) > 0 {
 		fmt.Printf("On branch %s\n", b)
-		return
+	} else {
+		fmt.Printf("HEAD detached at %x\n", head[:10])
 	}
-	fmt.Printf("HEAD detached at %x\n", head[:10])
+	fmt.Printf("Changes to be committed:\n\n")
+	t, _, _, err := base.GetCommit(head)
+	if err != nil {
+		panic(err)
+	}
+	nt, err := base.WriteTree(".")
+	if err != nil {
+		panic(err)
+	}
+	out, err := diff.GetTreesDiff(t, nt)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%s", out)
 }
 
 func resetHandler(cmd *cobra.Command, args []string) {
