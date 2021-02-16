@@ -8,7 +8,7 @@ import (
 
 	base "github.com/KoyamaSohei/ugit/base"
 	data "github.com/KoyamaSohei/ugit/data"
-	"github.com/KoyamaSohei/ugit/diff"
+	diff "github.com/KoyamaSohei/ugit/diff"
 	"github.com/spf13/cobra"
 )
 
