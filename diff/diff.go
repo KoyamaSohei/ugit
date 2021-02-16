@@ -20,14 +20,15 @@ func getBlobsDiff(poid, noid []byte, name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	dir := filepath.Dir(name)
 	pname := fmt.Sprintf("%s.prev", filepath.Base(name))
-	ptmp, err := ioutil.TempFile(filepath.Dir(name), pname)
+	ptmp, err := ioutil.TempFile(dir, pname)
 	if err != nil {
 		return "", err
 	}
 	defer os.Remove(ptmp.Name())
 	nname := fmt.Sprintf("%s.next", filepath.Base(name))
-	ntmp, err := ioutil.TempFile(filepath.Dir(name), nname)
+	ntmp, err := ioutil.TempFile(dir, nname)
 	if err != nil {
 		return "", err
 	}
@@ -38,7 +39,7 @@ func getBlobsDiff(poid, noid []byte, name string) (string, error) {
 	if _, err := ntmp.Write(no); err != nil {
 		return "", err
 	}
-	diff := exec.Command("diff", "--unified", "--show-c-function", "--label", pname, ptmp.Name(), "--label", nname, ntmp.Name())
+	diff := exec.Command("diff", "--unified", "--show-c-function", "--label", filepath.Join(dir, pname), ptmp.Name(), "--label", filepath.Join(dir, nname), ntmp.Name())
 	out, _ := diff.Output()
 	return string(out), nil
 }
