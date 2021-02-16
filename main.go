@@ -91,16 +91,9 @@ func logHandler(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 	for _, o := range oidset {
-		t, _, m, err := base.GetCommit(o)
-		if err != nil {
+		if err := base.PrintCommit(o, oids2ref[fmt.Sprintf("%x", o)]); err != nil {
 			panic(err)
 		}
-		ref := ""
-		for _, r := range oids2ref[fmt.Sprintf("%x", o)] {
-			ref += fmt.Sprintf(", %s", r)
-		}
-		ref = ref[2:]
-		fmt.Printf("Commit  %x (%s)\ntree    %x\nmessage %s\n\n", o, ref, t, m)
 	}
 }
 

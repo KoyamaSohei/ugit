@@ -279,3 +279,20 @@ func GetBranchNames() ([]string, error) {
 	name, _, err := data.GetRefs("refs/heads", false)
 	return name, err
 }
+
+// PrintCommit print commit
+func PrintCommit(oid []byte, refs []string) error {
+	t, _, m, err := GetCommit(oid)
+	if err != nil {
+		return err
+	}
+	ref := ""
+	for _, r := range refs {
+		ref += fmt.Sprintf(", %s", r)
+	}
+	if len(ref) > 0 {
+		ref = ref[2:]
+	}
+	fmt.Printf("Commit  %x (%s)\ntree    %x\nmessage %s\n\n", oid, ref, t, m)
+	return nil
+}
