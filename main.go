@@ -8,6 +8,7 @@ import (
 
 	base "github.com/KoyamaSohei/ugit/base"
 	data "github.com/KoyamaSohei/ugit/data"
+	"github.com/KoyamaSohei/ugit/diff"
 	"github.com/spf13/cobra"
 )
 
@@ -228,6 +229,22 @@ func showHandler(cmd *cobra.Command, args []string) {
 	if err := base.PrintCommit(oid, nil); err != nil {
 		panic(err)
 	}
+	ntoid, p, _, err := base.GetCommit(oid)
+	if err != nil {
+		panic(err)
+	}
+	if len(p) == 0 {
+		return
+	}
+	ptoid, _, _, err := base.GetCommit(p)
+	if err != nil {
+		panic(err)
+	}
+	out, err := diff.GetTreesDiff(ptoid, ntoid)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%s", out)
 }
 
 func main() {
