@@ -220,6 +220,16 @@ func resetHandler(cmd *cobra.Command, args []string) {
 	}
 }
 
+func showHandler(cmd *cobra.Command, args []string) {
+	oid, err := base.GetOid(args[0])
+	if err != nil {
+		panic(err)
+	}
+	if err := base.PrintCommit(oid, nil); err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   "ugit",
@@ -307,6 +317,12 @@ func main() {
 		Run:   resetHandler,
 		Args:  cobra.ExactArgs(1),
 	}
+	showCmd := &cobra.Command{
+		Use:   "show",
+		Short: "show",
+		Run:   showHandler,
+		Args:  cobra.ExactArgs(1),
+	}
 
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(hashCmd)
@@ -321,6 +337,7 @@ func main() {
 	rootCmd.AddCommand(branchCmd)
 	rootCmd.AddCommand(statusCmd)
 	rootCmd.AddCommand(resetCmd)
+	rootCmd.AddCommand(showCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
