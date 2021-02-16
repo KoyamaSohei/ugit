@@ -288,38 +288,38 @@ func main() {
 	rootCmd := &cobra.Command{
 		Use:   "ugit",
 		Short: "ugit is DIY Git",
-		Long:  `golang ver of https://www.leshenko.net/p/ugit/`,
+		Long:  `golang version of https://www.leshenko.net/p/ugit/`,
 		Run: func(cmd *cobra.Command, args []string) {
 			// Do Stuff Here
 		},
 	}
 	initCmd := &cobra.Command{
 		Use:   "init",
-		Short: "ugit init",
+		Short: "Create an empty ugit repository or reinitialize an existing one",
 		Run:   initHandler,
 		Args:  cobra.NoArgs,
 	}
 	hashCmd := &cobra.Command{
 		Use:   "hash-object",
-		Short: "save object",
+		Short: "Compute object ID and optionally creates a blob from a file",
 		Run:   hashHandler,
 		Args:  cobra.ExactArgs(1),
 	}
 	catCmd := &cobra.Command{
 		Use:   "cat-file",
-		Short: "ugit cat",
+		Short: "Provide content or type and size information for repository objects",
 		Run:   catHandler,
 		Args:  cobra.ExactArgs(1),
 	}
 	writeCmd := &cobra.Command{
 		Use:   "write-tree",
-		Short: "ugit write",
+		Short: "Create a tree object from the current index",
 		Run:   writeHandler,
 		Args:  cobra.NoArgs,
 	}
 	readCmd := &cobra.Command{
 		Use:   "read-tree",
-		Short: "read tree",
+		Short: "Reads tree information into the index",
 		Run:   readHandler,
 		Args:  cobra.ExactArgs(1),
 	}
@@ -331,55 +331,55 @@ func main() {
 	}
 	logCmd := &cobra.Command{
 		Use:   "log",
-		Short: "log",
+		Short: "Show commit logs",
 		Run:   logHandler,
 		Args:  cobra.MaximumNArgs(1),
 	}
 	checkoutCmd := &cobra.Command{
 		Use:   "checkout",
-		Short: "checkout",
+		Short: "Switch branches or restore working tree files",
 		Run:   checkoutHandler,
 		Args:  cobra.ExactArgs(1),
 	}
 	tagCmd := &cobra.Command{
 		Use:   "tag",
-		Short: "tag",
+		Short: "Create a tag object",
 		Run:   tagHandler,
 		Args:  cobra.RangeArgs(1, 2),
 	}
 	kCmd := &cobra.Command{
 		Use:   "k",
-		Short: "k",
+		Short: "Visualize tool like gitk",
 		Run:   kHandler,
 		Args:  cobra.NoArgs,
 	}
 	branchCmd := &cobra.Command{
 		Use:   "branch",
-		Short: "branch",
+		Short: "List, create, or delete branches",
 		Run:   branchHandler,
 		Args:  cobra.MaximumNArgs(2),
 	}
 	statusCmd := &cobra.Command{
 		Use:   "status",
-		Short: "status",
+		Short: "Show the working tree status",
 		Run:   statusHandler,
 		Args:  cobra.NoArgs,
 	}
 	resetCmd := &cobra.Command{
 		Use:   "reset",
-		Short: "reset",
+		Short: "Reset current HEAD to the specified state",
 		Run:   resetHandler,
 		Args:  cobra.ExactArgs(1),
 	}
 	showCmd := &cobra.Command{
 		Use:   "show",
-		Short: "show",
+		Short: "Show various types of objects",
 		Run:   showHandler,
 		Args:  cobra.ExactArgs(1),
 	}
 	diffCmd := &cobra.Command{
 		Use:   "diff",
-		Short: "diff",
+		Short: "Show changes between commits, commit and working tree, etc",
 		Run:   diffHandler,
 		Args:  cobra.MaximumNArgs(1),
 	}
